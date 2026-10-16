@@ -1,0 +1,135 @@
+"""Слова-маркеры: тип адресного компонента и его справочное написание.
+
+Ключи — `fold()`-формы (без «ь/ъ», казахские буквы свёрнуты), поэтому
+«подъезд», «подьезд» и «подезд» дают один ключ, а «көшесі» и «кошеси» —
+другой. Значение — (категория, справочная форма для street_type или None).
+"""
+
+from __future__ import annotations
+
+from .text import fold
+
+# Категории
+CITY = "city"  # город, г., қаласы
+SETTLEMENT = "settlement"  # село, пос., аул
+REGION = "region"  # область
+DISTRICT = "district"  # район
+STREET = "street"  # улица, проспект, переулок …
+AREA = "area"  # микрорайон, жилой массив, квартал
+ZHK = "zhk"  # жилой комплекс — всегда living_area
+HOUSE = "house"
+CORPUS = "corpus"  # корпус/блок: номер не является полем, но и не квартира
+APT = "apt"
+ENTRANCE = "entrance"
+FLOOR = "floor"
+COUNTRY = "country"
+LANDMARK = "landmark"
+
+NUMBER_MARKERS = frozenset({HOUSE, CORPUS, APT, ENTRANCE, FLOOR})
+STREETISH = frozenset({STREET, AREA, ZHK})
+ADMIN = frozenset({CITY, SETTLEMENT, REGION, DISTRICT})
+
+# Казахские маркеры обычно стоят ПОСЛЕ числа/названия («5 үй», «Абай көшесі»).
+POSTFIX_LANG = frozenset(
+    fold(w)
+    for w in (
+        "үй пәтер қабат кіреберіс көшесі көш даңғылы қаласы ауылы облысы ауданы "
+        "шағын ықшам тұйық алабы кешені кенті"
+    ).split()
+)
+
+
+def _table() -> dict[str, tuple[str, str | None]]:
+    groups: list[tuple[str, str | None, str]] = [
+        (CITY, None, "город г гор қаласы қала city"),
+        (
+            SETTLEMENT,
+            None,
+            "поселок посёлок пос п пгт село с аул ауылы ауыл кент кенті станция "
+            "ст деревня дер хутор village",
+        ),
+        (REGION, None, "область обл облысы обл-ть region oblast"),
+        (DISTRICT, None, "район р-н ауданы аудан district"),
+        (STREET, "улица", "улица ул ул-ца у-ца көшесі көш к-сі кошеси street str st"),
+        (
+            STREET,
+            "проспект",
+            "проспект пр просп пр-т пр-кт прт даңғылы даңғ дангылы avenue ave av pr",
+        ),
+        (STREET, "переулок", "переулок пер пер-к тұйығы тұйық"),
+        (STREET, "тупик", "тупик туп"),
+        (STREET, "бульвар", "бульвар б-р бул"),
+        (STREET, "шоссе", "шоссе"),
+        (STREET, "тракт", "тракт"),
+        (STREET, "трасса", "трасса"),
+        (STREET, "набережная", "набережная наб"),
+        (STREET, "площадь", "площадь пл алаңы"),
+        (STREET, "проезд", "проезд пр-д өтпе"),
+        (STREET, "аллея", "аллея"),
+        (STREET, "линия", "линия"),
+        (
+            AREA,
+            "микрорайон",
+            "микрорайон микрорайона мкр мкрн мкр-н м-н мк микр мр-н мр шағынаудан "
+            "mkr microdistrict md",
+        ),
+        (AREA, "жилой массив", "ж/м жм жилмассив массив ж.м"),
+        (AREA, "квартал", "квартал кв-л кварт"),
+        (ZHK, None, "жк жилкомплекс түк residential"),
+        (HOUSE, None, "дом д үй уй house h здание зд участок уч владение вл"),
+        (CORPUS, None, "корпус корп к блок бл стр строение"),
+        (
+            APT,
+            None,
+            "квартира кв кв-ра пәтер патер flat kv apt apartment app офис оф помещение "
+            "пом кабинет каб комната ком бөлме",
+        ),
+        (ENTRANCE, None, "подъезд подьезд подезд под пд п-д подъ кіреберіс entrance"),
+        (FLOOR, None, "этаж эт қабат кабат floor"),
+        (COUNTRY, None, "казахстан қазақстан рк kazakhstan kz республика"),
+        (
+            LANDMARK,
+            None,
+            "магазин маг супермаркет минимаркет тц трц тд бц рынок базар напротив "
+            "возле около рядом остановка ост школа школы больница поликлиника "
+            "аптека мечеть церковь кафе ресторан банк qazpost казпочта kazpost "
+            "почта отделение азс вокзал ориентир между угол сто садик университет "
+            "колледж гостиница отель magnum small дүкені дүкен мектеп емхана "
+            "аялдама қарсы жанында",
+        ),
+    ]
+    table: dict[str, tuple[str, str | None]] = {}
+    for cat, canon, words in groups:
+        for w in words.split():
+            table.setdefault(fold(w), (cat, canon))
+    return table
+
+
+SINGLE = _table()
+
+# Многословные маркеры: проверяются раньше однословных.
+MULTI: list[tuple[tuple[str, ...], str, str | None]] = [
+    (tuple(fold(w) for w in words.split()), cat, canon)
+    for words, cat, canon in [
+        ("шағын аудан", AREA, "микрорайон"),
+        ("шағын ауданы", AREA, "микрорайон"),
+        ("ықшам аудан", AREA, "микрорайон"),
+        ("ықшам ауданы", AREA, "микрорайон"),
+        ("жилой массив", AREA, "жилой массив"),
+        ("тұрғын алабы", AREA, "жилой массив"),
+        ("жилой комплекс", ZHK, None),
+        ("тұрғын үй кешені", ZHK, None),
+        ("тұрғын үй кешенi", ZHK, None),
+        ("residential complex", ZHK, None),
+        ("торговый центр", LANDMARK, None),
+        ("бизнес центр", LANDMARK, None),
+        ("детский сад", LANDMARK, None),
+        ("сельский округ", DISTRICT, None),
+        ("республика казахстан", COUNTRY, None),
+    ]
+]
+MULTI.sort(key=lambda m: -len(m[0]))
+
+# Однобуквенные маркеры опасны («с», «п», «г», «д», «к»): они считаются
+# маркерами только в определённом окружении — см. parser.
+AMBIGUOUS_SHORT = frozenset(fold(w) for w in "с п г д к у ш т ст пр пл под ком пом оф каб".split())
