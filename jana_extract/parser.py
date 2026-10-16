@@ -21,6 +21,7 @@
 from __future__ import annotations
 
 import itertools
+import re
 from dataclasses import dataclass, field
 
 from . import markers as M
@@ -642,11 +643,21 @@ class Parser:
         main = [c for c in cs if not c.alt]
         return (main or cs or [None])[0]
 
+    def _resolve_region(self, c: Comp) -> tuple[int, float] | None:
+        """«Алматы обл» — это Алматинская область, а не город Алматы."""
+        text = c.text(self.tk)
+        if c.marked:
+            for suffix in (" облысы", " область"):
+                hit = self.ref.find_region(text + suffix, fuzzy=False)
+                if hit and not self.ref.is_republican_city(hit[0]):
+                    return hit
+        return self.ref.find_region(text)
+
     def _prelim_region(self) -> None:
         """Ранняя оценка области — чтобы проверять названия мкр по справочнику."""
         reg = self._pick(M.REGION)
         if reg:
-            hit = self.ref.find_region(reg.text(self.tk))
+            hit = self._resolve_region(reg)
             if hit:
                 self.region = hit[0]
                 return
@@ -673,7 +684,7 @@ class Parser:
         region_idx: int | None = None
         region_conf = 0.0
         if reg_c:
-            hit = self.ref.find_region(reg_c.text(self.tk))
+            hit = self._resolve_region(reg_c)
             if hit:
                 region_idx, region_conf = hit[0], 0.95 * hit[1]
 
@@ -682,14 +693,14 @@ class Parser:
         district_text: str | None = None
         if dis_c:
             hit = self.ref.find_district(dis_c.text(self.tk), region=region_idx)
-            if hit is None and region_idx is None:
+            if hit is None:
                 hit = self.ref.find_district(dis_c.text(self.tk))
+                if hit and region_idx is not None:
+                    hit = (hit[0], hit[1] * 0.7)  # район из другой области — сомнительно
             if hit:
                 district_idx, district_conf = hit[0], 0.95 * hit[1]
             else:
-                from re import sub
-
-                district_text = sub(r"(?i)\b(район|р-н|ауданы|аудан)\b", "", dis_c.text(self.tk))
+                district_text = re.sub(r"(?i)\b(район|р-н|ауданы|аудан)\b", "", dis_c.text(self.tk))
                 district_text = " ".join(district_text.split()) or None
                 district_conf = 0.6
 
@@ -770,7 +781,11 @@ class Parser:
                         district_idx, district_conf = hit[0], 0.5 + 0.4 * hit[1]
                         break
             elif settlement is not None and settlement.district is not None:
-                district_idx, district_conf = settlement.district, 0.8 * max(city_conf, 0.5)
+                d_name = self.ref.district_name(settlement.district) or ""
+                # «Конаев» внутри «Конаев» — это горадминистрация, а не район.
+                if core(d_name) != core(settlement.name):
+                    district_idx = settlement.district
+                    district_conf = 0.8 * max(city_conf, 0.5)
         if district_idx is not None:
             d = self.ref.districts[district_idx]
             if region_idx is None:
