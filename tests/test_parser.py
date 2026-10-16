@@ -38,3 +38,28 @@ def test_garbage_never_crashes(raw):
     res = parse_address(raw)
     assert set(res.values) == set(FIELDS)
     assert 0 <= res.confidence <= 1
+
+
+def test_house_literal_glued_to_marker():
+    v = parse_address("Нурсат микрорайон 21адом 9 подьезд 133 кв").values
+    assert (v["street_name"], v["house"], v["entrance"], v["apartment"]) == (
+        "Нурсат",
+        "21а",
+        "9",
+        "133",
+    )
+
+
+def test_kazakh_half_without_comma_ends_at_marker():
+    v = parse_address("город Астана/Астана қаласы Толе би 19/4 kv 204").values
+    assert (v["city"], v["street_name"], v["house"], v["apartment"]) == (
+        "Астана",
+        "Толе би",
+        "19/4",
+        "204",
+    )
+
+
+def test_kazakh_street_half_keeps_house():
+    v = parse_address("г. Алматы, ул. Абая/Абай көшесі 5, кв 3").values
+    assert (v["street_name"], v["house"], v["apartment"]) == ("Абая", "5", "3")

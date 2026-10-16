@@ -16,7 +16,7 @@ import re
 import unicodedata
 from dataclasses import dataclass, field
 
-from .markers import MULTI, SINGLE
+from .markers import MULTI, NUMBER_MARKERS, POSTFIX_LANG, SINGLE
 from .text import INVISIBLE, fold, has_kazakh_letters
 
 WORD = "word"
@@ -37,6 +37,7 @@ _TOKEN = re.compile(
     """,
     re.VERBOSE,
 )
+_LIT_RE = re.compile(_LIT)
 _ORD_RE = re.compile(r"^(?:ый|ий|ой|ая|яя|ое|ее|ые|го|й|я|е|шы|ші|ши|сы|сі|ы|і|th|st|nd|rd)$", re.I)
 
 
@@ -126,6 +127,23 @@ def tokenize(raw: str) -> Tokenized:
             continue
         tok_kind = {"num": NUM, "word": WORD, "abbr": WORD}[kind]
         tok_text = m.group()
+        if kind == "word" and prev_end_clean == s and out.tokens and out.tokens[-1].is_num:
+            # «85адом», «12бкв»: литера дома слиплась с маркером.
+            prev = out.tokens[-1]
+            head, rest = tok_text[:1], tok_text[1:]
+            rest_hit = SINGLE.get(fold(rest))
+            if (
+                fold(tok_text) not in SINGLE
+                and rest_hit is not None
+                and rest_hit[0] in NUMBER_MARKERS
+                and _LIT_RE.fullmatch(head)
+                and not prev.text[-1:].isalpha()
+            ):
+                prev.end = imap[s] + 1
+                prev.text = raw[prev.start : prev.end]
+                prev.f = fold(prev.text)
+                s += 1
+                tok_text = rest
         if tok_kind == WORD and out.tokens and out.tokens[-1].is_num and _ORD_RE.match(tok_text):
             prev = out.tokens[-1]
             if prev.seg == seg and (prev_end_clean == s or pending_hyphen):
@@ -209,6 +227,17 @@ def _mark_bilingual(tokens: list[Token], slashes: list[int]) -> None:
         seg = left_last.seg
         left = [t for t in tokens[:pos] if t.seg == seg]
         right = [t for t in tokens[pos:] if t.seg == seg]
+        # Правая половина без запятой после неё: «город Астана/Астана қаласы Толе би 19».
+        # Она заканчивается на первом казахском маркере («қаласы»), а без маркера —
+        # перед первым числом. Хвост — снова основной текст, отдельный сегмент.
+        cut = next(
+            (k + 1 for k, t in enumerate(right) if t.marker and t.f in POSTFIX_LANG),
+            next((k for k, t in enumerate(right) if t.is_num), len(right)),
+        )
+        tail = right[cut:]
+        right = right[:cut]
+        for t in tail:
+            t.seg = seg + 0.75  # type: ignore[assignment]
         if not any(t.is_word for t in left) or not any(t.is_word for t in right):
             continue
         lk, rk = _is_kazakh_side(left), _is_kazakh_side(right)

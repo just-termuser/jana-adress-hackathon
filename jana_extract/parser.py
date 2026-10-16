@@ -382,7 +382,11 @@ class Parser:
             post = self._postfix_name(m)
             pre_words = any(t.kind == WORD for t in pre)
             post_words = any(t.kind == WORD for t in post)
-            if m.f in M.POSTFIX_LANG and post:
+            pre_starts_num = bool(pre) and pre[0].kind == NUM and not pre[0].hyphen_prev
+            if (m.f in M.POSTFIX_LANG or pre_starts_num) and post_words:
+                # «Нурсат микрорайон 21 …»: число после маркера — дом, не название.
+                name = post
+            elif m.f in M.POSTFIX_LANG and post:
                 name = post
             elif pre_words or (pre and not post_words):
                 name = pre
