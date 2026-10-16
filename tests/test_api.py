@@ -80,3 +80,10 @@ def test_file_upload_json_and_csv(client):
 def test_reference_info(client):
     info = client.get("/reference/info").json()
     assert info["counts"]["regions"] == 20
+
+
+def test_ui_is_served_offline(client):
+    html = client.get("/").text
+    assert "/static/app.js" in html
+    assert "http://" not in html and "https://" not in html  # никаких CDN
+    assert client.get("/static/app.js").status_code == 200

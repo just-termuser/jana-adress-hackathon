@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jana Extract — разбор адресов</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <h1>Jana Extract</h1>
+  <p class="sub">Извлечение полей адреса без нормализации: всё, что в строке, возвращается как написано.</p>
+</header>
+
+<section class="input">
+  <div class="drop" id="drop">
+    <input type="file" id="file" accept=".json,.jsonl,.csv,.txt" hidden>
+    <p><b>Перетащите файл</b> или <button type="button" id="pick">выберите</button></p>
+    <p class="hint">JSON-массив <code>[{"id","raw_address"}]</code>, JSONL, CSV с колонками id, raw_address или TXT (адрес на строку)</p>
+  </div>
+  <div class="paste">
+    <textarea id="paste" rows="5" placeholder="…или вставьте адреса, по одному на строку"></textarea>
+    <div class="row">
+      <button type="button" id="run">Разобрать</button>
+      <button type="button" id="demo" class="ghost">Пример</button>
+    </div>
+  </div>
+</section>
+
+<section class="toolbar" id="toolbar" hidden>
+  <div class="stats" id="stats"></div>
+  <label><input type="checkbox" id="lowOnly"> только уверенность &lt; <input type="number" id="thr" value="0.75" step="0.05" min="0" max="1"></label>
+  <input type="search" id="q" placeholder="поиск">
+  <span class="spacer"></span>
+  <button type="button" id="expJson">Скачать JSON</button>
+  <button type="button" id="expCsv">Скачать CSV</button>
+</section>
+
+<section class="legend" id="legend" hidden></section>
+
+<div class="tablewrap">
+  <table id="grid" hidden>
+    <thead></thead>
+    <tbody></tbody>
+  </table>
+</div>
+<p class="hint foot">Ячейки редактируются по клику. Красная рамка — значение не является подстрокой исходного адреса
+  (для province, district и street_type допустим справочный формат). Правки хранятся в браузере и попадают в экспорт.</p>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
