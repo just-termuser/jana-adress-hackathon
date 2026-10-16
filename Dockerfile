@@ -24,6 +24,8 @@ CMD ["uvicorn", "jana_extract.api:app", "--host", "0.0.0.0", "--port", "8000", "
 # Пересборка справочника из PBF: docker compose --profile build-reference run --rm build-reference
 FROM runtime AS reference-builder
 USER root
+# pyosmium линкуется с expat, которого нет в slim-образе.
+RUN apt-get update && apt-get install -y --no-install-recommends libexpat1     && rm -rf /var/lib/apt/lists/*
 COPY requirements-build.txt .
 RUN pip install -r requirements-build.txt
 COPY tools ./tools
