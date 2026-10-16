@@ -1,0 +1,18 @@
+[
+  {
+    "id": "rec_00417",
+    "raw_address": "город Алматы/Алматы қаласы, Мкр Аксай 3а, 59, кв 70",
+    "province": "Алматы",
+    "city": "Алматы",
+    "district": "Ауэзовский",
+    "living_area": null,
+    "street_type": "микрорайон",
+    "street_name": "Аксай 3а",
+    "house": "59",
+    "apartment": "70",
+    "entrance": null,
+    "floor": null,
+    "landmark": null,
+    "confidence": 0.91
+  }
+]

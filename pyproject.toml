@@ -1,0 +1,20 @@
+[project]
+name = "jana-extract"
+version = "0.1.0"
+description = "Jana Post × Terricon Valley: извлечение полей из адреса без нормализации"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+pythonpath = ["."]
+addopts = "-m 'not perf'"
+markers = ["perf: замер производительности"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "RUF"]
+ignore = ["RUF001", "RUF002", "RUF003", "RUF012"]
