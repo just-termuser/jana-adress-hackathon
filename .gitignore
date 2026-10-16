@@ -5,3 +5,4 @@ __pycache__/
 data/*.tmp
 bench_*.json
 .scratch/
+data/reference.docker.json.gz

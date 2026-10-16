@@ -1,0 +1,21 @@
+services:
+  jana-extract:
+    build:
+      context: .
+      target: runtime
+    image: jana-extract:latest
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  # Не запускается по `docker compose up`. Пересобирает data/reference.json.gz
+  # из ../osm/*.osm.pbf (нужен интернет только для pip при сборке образа).
+  build-reference:
+    profiles: ["build-reference"]
+    build:
+      context: .
+      target: reference-builder
+    volumes:
+      - ../osm:/osm:ro
+      - ./data:/app/data
+    command: ["--pbf", "/osm/kazakhstan-261015.osm.pbf", "--out", "/app/data/reference.json.gz"]
