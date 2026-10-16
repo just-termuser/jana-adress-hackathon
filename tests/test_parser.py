@@ -69,3 +69,56 @@ def test_country_word_as_street_name():
     v = parse_address("Усть-Каменогорск, ул. Казахстан 59, кв. 101").values
     assert (v["street_type"], v["street_name"], v["house"]) == ("улица", "Казахстан", "59")
     assert parse_address("Республика Казахстан, г. Алматы, Абая 5").values["street_name"] == "Абая"
+
+
+def test_fuzz_no_crash_and_substring_invariant():
+    import random
+
+    rnd = random.Random(7)
+    parts = [
+        "г.",
+        "Алматы",
+        "/",
+        "қаласы",
+        ",",
+        "мкр",
+        "Аксай",
+        "3а",
+        "-",
+        "кв",
+        "70",
+        "д.",
+        "1/2",
+        "подьезд",
+        "4",
+        "ЖК",
+        '"',
+        "магазин",
+        "flat",
+        "​",
+        " ",
+        "ул",
+        "Абая",
+        "көшесі",
+        "пәтер",
+        "р-н",
+        "№",
+        "(",
+        ":",
+        ".",
+        "66квартал",
+        "Назарбаева8",
+        "11дом",
+        "😀",
+        "5-й",
+        "с",
+        "д",
+    ]
+    for _ in range(1000):
+        raw = "".join(
+            rnd.choice(parts) + rnd.choice(["", " ", ","]) for _ in range(rnd.randint(0, 12))
+        )
+        res = parse_address(raw)
+        for f in SUBSTRING_FIELDS:
+            v = res.values[f]
+            assert v is None or (v in raw and v == v.strip() and v), (f, v, raw)
