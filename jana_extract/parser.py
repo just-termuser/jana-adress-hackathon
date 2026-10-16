@@ -137,6 +137,8 @@ class Parser:
 
     def step_noise(self) -> None:
         for t in self.toks:
+            if t.marker == M.COUNTRY and self._country_is_street_name(t):
+                t.marker = None  # «ул. Казахстан», «Казахстан көшесі»
             if t.marker == M.COUNTRY:
                 t.used = "country"
                 if t.marker_len > 1:
@@ -144,6 +146,18 @@ class Parser:
                         x.used = "country"
             elif t.kind == NUM and len(t.text) == 6 and t.text.isdigit():
                 t.used = "postcode"
+
+    def _country_is_street_name(self, t: Token) -> bool:
+        prev = self.toks[t.i - 1] if t.i > 0 else None
+        nxt = self.toks[t.i + t.marker_len] if t.i + t.marker_len < len(self.toks) else None
+        prev_street = prev is not None and prev.seg == t.seg and prev.marker in M.STREETISH
+        next_street = (
+            nxt is not None
+            and nxt.seg == t.seg
+            and nxt.marker in M.STREETISH
+            and nxt.f in M.POSTFIX_LANG
+        )
+        return prev_street or next_street
 
     def step_number_markers(self) -> None:
         """Глобальная привязка маркеров номеров к соседним числам."""

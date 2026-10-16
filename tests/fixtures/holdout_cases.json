@@ -1,0 +1,605 @@
+[
+ {
+  "raw": "г. Алматы, ул. Розыбакиева 247, кв. 12",
+  "expect": {
+   "province": "Алматы",
+   "city": "Алматы",
+   "living_area": null,
+   "street_type": "улица",
+   "street_name": "Розыбакиева",
+   "house": "247",
+   "apartment": "12",
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "Алматы қаласы, Төле би көшесі 101, 15 пәтер",
+  "expect": {
+   "province": "Алматы",
+   "city": "Алматы",
+   "living_area": null,
+   "street_type": "улица",
+   "street_name": "Төле би",
+   "house": "101",
+   "apartment": "15",
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "город Шымкент/Шымкент қаласы, мкр Кайтпас 1, 45",
+  "expect": {
+   "province": "Шымкент",
+   "city": "Шымкент",
+   "living_area": null,
+   "street_type": "микрорайон",
+   "street_name": "Кайтпас 1",
+   "house": "45",
+   "apartment": null,
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "Астана, Сарыарка р-н, пр. Республики 24, кв 8",
+  "expect": {
+   "province": "Астана",
+   "city": "Астана",
+   "living_area": null,
+   "street_type": "проспект",
+   "street_name": "Республики",
+   "house": "24",
+   "apartment": "8",
+   "entrance": null,
+   "floor": null,
+   "landmark": null,
+   "district": "Сарыарка"
+  }
+ },
+ {
+  "raw": "г. Караганда, мкр. Голубые пруды, д. 7, кв. 21",
+  "expect": {
+   "province": "Карагандинская область",
+   "city": "Караганда",
+   "living_area": null,
+   "street_type": "микрорайон",
+   "street_name": "Голубые пруды",
+   "house": "7",
+   "apartment": "21",
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "Павлодар, ул.Кутузова 4/1 кв33",
+  "expect": {
+   "province": "Павлодарская область",
+   "city": "Павлодар",
+   "living_area": null,
+   "street_type": "улица",
+   "street_name": "Кутузова",
+   "house": "4/1",
+   "apartment": "33",
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "Костанай, Байтурсынова 65а, подъезд 2, этаж 4, кв 17",
+  "expect": {
+   "province": "Костанайская область",
+   "city": "Костанай",
+   "living_area": null,
+   "street_type": null,
+   "street_name": "Байтурсынова",
+   "house": "65а",
+   "apartment": "17",
+   "entrance": "2",
+   "floor": "4",
+   "landmark": null
+  }
+ },
+ {
+  "raw": "Атырау, мкр Нурсая, ул. Тайманова 10",
+  "expect": {
+   "province": "Атырауская область",
+   "city": "Атырау",
+   "living_area": "Нурсая",
+   "street_type": "улица",
+   "street_name": "Тайманова",
+   "house": "10",
+   "apartment": null,
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "Актау 12 мкр 5 дом 44 кв",
+  "expect": {
+   "province": "Мангистауская область",
+   "city": "Актау",
+   "living_area": null,
+   "street_type": "микрорайон",
+   "street_name": "12",
+   "house": "5",
+   "apartment": "44",
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "Уральск, ул. Евразия 123/2",
+  "expect": {
+   "province": "Западно-Казахстанская область",
+   "city": "Уральск",
+   "living_area": null,
+   "street_type": "улица",
+   "street_name": "Евразия",
+   "house": "123/2",
+   "apartment": null,
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "г.Тараз, ул.Толе би, д.45, кв.3",
+  "expect": {
+   "province": "Жамбылская область",
+   "city": "Тараз",
+   "living_area": null,
+   "street_type": "улица",
+   "street_name": "Толе би",
+   "house": "45",
+   "apartment": "3",
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "Кызылорда, Абая 12",
+  "expect": {
+   "province": "Кызылординская область",
+   "city": "Кызылорда",
+   "living_area": null,
+   "street_type": null,
+   "street_name": "Абая",
+   "house": "12",
+   "apartment": null,
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "Алматинская область, Талгарский район, г. Талгар, ул. Абая 5",
+  "expect": {
+   "province": "Алматинская область",
+   "city": "Талгар",
+   "living_area": null,
+   "street_type": "улица",
+   "street_name": "Абая",
+   "house": "5",
+   "apartment": null,
+   "entrance": null,
+   "floor": null,
+   "landmark": null,
+   "district": "Талгарский"
+  }
+ },
+ {
+  "raw": "Семей қаласы, Шәкәрім даңғылы 20, 7 пәтер",
+  "expect": {
+   "province": "Абайская область",
+   "city": "Семей",
+   "living_area": null,
+   "street_type": "проспект",
+   "street_name": "Шәкәрім",
+   "house": "20",
+   "apartment": "7",
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "Усть-Каменогорск, ул. Казахстан 59, кв. 101",
+  "expect": {
+   "province": "Восточно-Казахстанская область",
+   "city": "Усть-Каменогорск",
+   "living_area": null,
+   "street_type": "улица",
+   "street_name": "Казахстан",
+   "house": "59",
+   "apartment": "101",
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "Петропавловск, Жамбыла 160",
+  "expect": {
+   "province": "Северо-Казахстанская область",
+   "city": "Петропавловск",
+   "living_area": null,
+   "street_type": null,
+   "street_name": "Жамбыла",
+   "house": "160",
+   "apartment": null,
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "Кокшетау, мкр Сарыарка 4, 12",
+  "expect": {
+   "province": "Акмолинская область",
+   "city": "Кокшетау",
+   "living_area": null,
+   "street_type": "микрорайон",
+   "street_name": "Сарыарка 4",
+   "house": "12",
+   "apartment": null,
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "Туркестан, ул. Тауке хана 289",
+  "expect": {
+   "province": "Туркестанская область",
+   "city": "Туркестан",
+   "living_area": null,
+   "street_type": "улица",
+   "street_name": "Тауке хана",
+   "house": "289",
+   "apartment": null,
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "Талдыкорган, Шевченко 120, кв 6",
+  "expect": {
+   "province": "Жетысуская область",
+   "city": "Талдыкорган",
+   "living_area": null,
+   "street_type": null,
+   "street_name": "Шевченко",
+   "house": "120",
+   "apartment": "6",
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "Жезказган, пр. Мира 5",
+  "expect": {
+   "province": "Улутауская область",
+   "city": "Жезказган",
+   "living_area": null,
+   "street_type": "проспект",
+   "street_name": "Мира",
+   "house": "5",
+   "apartment": null,
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "г. Алматы, мкр. Алмагуль, д. 9а, кв. 77",
+  "expect": {
+   "province": "Алматы",
+   "city": "Алматы",
+   "living_area": null,
+   "street_type": "микрорайон",
+   "street_name": "Алмагуль",
+   "house": "9а",
+   "apartment": "77",
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "Алматы, Наурызбайский район, мкр Шугыла, ул. Жуалы 22",
+  "expect": {
+   "province": "Алматы",
+   "city": "Алматы",
+   "living_area": "Шугыла",
+   "street_type": "улица",
+   "street_name": "Жуалы",
+   "house": "22",
+   "apartment": null,
+   "entrance": null,
+   "floor": null,
+   "landmark": null,
+   "district": "Наурызбайский"
+  }
+ },
+ {
+  "raw": "Алматы, ЖК Алматы Тауэрс, Достык 52",
+  "expect": {
+   "province": "Алматы",
+   "city": "Алматы",
+   "living_area": "Алматы Тауэрс",
+   "street_type": null,
+   "street_name": "Достык",
+   "house": "52",
+   "apartment": null,
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "Астана, ЖК Хайвил, Ахмет Байтурсынулы 9, кв 120",
+  "expect": {
+   "province": "Астана",
+   "city": "Астана",
+   "living_area": "Хайвил",
+   "street_type": null,
+   "street_name": "Ахмет Байтурсынулы",
+   "house": "9",
+   "apartment": "120",
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "г. Астана, ул. Кенесары, 40, 3 подъезд, 9 этаж, кв. 55",
+  "expect": {
+   "province": "Астана",
+   "city": "Астана",
+   "living_area": null,
+   "street_type": "улица",
+   "street_name": "Кенесары",
+   "house": "40",
+   "apartment": "55",
+   "entrance": "3",
+   "floor": "9",
+   "landmark": null
+  }
+ },
+ {
+  "raw": "Шымкент, Тамерлановское шоссе 12",
+  "expect": {
+   "province": "Шымкент",
+   "city": "Шымкент",
+   "living_area": null,
+   "street_type": "шоссе",
+   "street_name": "Тамерлановское",
+   "house": "12",
+   "apartment": null,
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "Almaty, Dostyk ave 85, flat 3",
+  "expect": {
+   "province": "Алматы",
+   "city": "Almaty",
+   "living_area": null,
+   "street_type": "проспект",
+   "street_name": "Dostyk",
+   "house": "85",
+   "apartment": "3",
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "г. Актобе, пр-т Санкибай батыра 1, ТРЦ Керуен",
+  "expect": {
+   "province": "Актюбинская область",
+   "city": "Актобе",
+   "living_area": null,
+   "street_type": "проспект",
+   "street_name": "Санкибай батыра",
+   "house": "1",
+   "apartment": null,
+   "entrance": null,
+   "floor": null,
+   "landmark": "ТРЦ Керуен"
+  }
+ },
+ {
+  "raw": "Караганда, ул. Ерубаева 50, напротив Арбата",
+  "expect": {
+   "province": "Карагандинская область",
+   "city": "Караганда",
+   "living_area": null,
+   "street_type": "улица",
+   "street_name": "Ерубаева",
+   "house": "50",
+   "apartment": null,
+   "entrance": null,
+   "floor": null,
+   "landmark": "напротив Арбата"
+  }
+ },
+ {
+  "raw": "Алматы, Абая 10, кв 5 (магазин Small)",
+  "expect": {
+   "province": "Алматы",
+   "city": "Алматы",
+   "living_area": null,
+   "street_type": null,
+   "street_name": "Абая",
+   "house": "10",
+   "apartment": "5",
+   "entrance": null,
+   "floor": null,
+   "landmark": "магазин Small"
+  }
+ },
+ {
+  "raw": "Экибастуз, ул. Энергетиков 54/3",
+  "expect": {
+   "province": "Павлодарская область",
+   "city": "Экибастуз",
+   "living_area": null,
+   "street_type": "улица",
+   "street_name": "Энергетиков",
+   "house": "54/3",
+   "apartment": null,
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "Аксай, мкр 2, д 15",
+  "expect": {
+   "province": "Западно-Казахстанская область",
+   "city": "Аксай",
+   "living_area": null,
+   "street_type": "микрорайон",
+   "street_name": "2",
+   "house": "15",
+   "apartment": null,
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "г. Темиртау, 8 мкр, дом 20, кв 45",
+  "expect": {
+   "province": "Карагандинская область",
+   "city": "Темиртау",
+   "living_area": null,
+   "street_type": "микрорайон",
+   "street_name": "8",
+   "house": "20",
+   "apartment": "45",
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "Рудный, ул. 50 лет Октября 10",
+  "expect": {
+   "province": "Костанайская область",
+   "city": "Рудный",
+   "living_area": null,
+   "street_type": "улица",
+   "street_name": "50 лет Октября",
+   "house": "10",
+   "apartment": null,
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "Балхаш, Ленина 4-12",
+  "expect": {
+   "province": "Карагандинская область",
+   "city": "Балхаш",
+   "living_area": null,
+   "street_type": null,
+   "street_name": "Ленина",
+   "house": null,
+   "apartment": null,
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "Конаев, 1 мкр, 17",
+  "expect": {
+   "province": "Алматинская область",
+   "city": "Конаев",
+   "living_area": null,
+   "street_type": "микрорайон",
+   "street_name": "1",
+   "house": "17",
+   "apartment": null,
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "Жанаозен, мкр Мунайшы, 3",
+  "expect": {
+   "province": "Мангистауская область",
+   "city": "Жанаозен",
+   "living_area": null,
+   "street_type": "микрорайон",
+   "street_name": "Мунайшы",
+   "house": "3",
+   "apartment": null,
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "Астана Республики 1",
+  "expect": {
+   "province": "Астана",
+   "city": "Астана",
+   "living_area": null,
+   "street_type": null,
+   "street_name": "Республики",
+   "house": "1",
+   "apartment": null,
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ },
+ {
+  "raw": "Алматы, улица Жандосова 98 кв 3 эт 2",
+  "expect": {
+   "province": "Алматы",
+   "city": "Алматы",
+   "living_area": null,
+   "street_type": "улица",
+   "street_name": "Жандосова",
+   "house": "98",
+   "apartment": "3",
+   "entrance": null,
+   "floor": "2",
+   "landmark": null
+  }
+ },
+ {
+  "raw": "Степногорск, 4 мкр, 25",
+  "expect": {
+   "province": "Акмолинская область",
+   "city": "Степногорск",
+   "living_area": null,
+   "street_type": "микрорайон",
+   "street_name": "4",
+   "house": "25",
+   "apartment": null,
+   "entrance": null,
+   "floor": null,
+   "landmark": null
+  }
+ }
+]

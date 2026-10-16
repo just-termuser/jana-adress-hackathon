@@ -63,3 +63,9 @@ def test_kazakh_half_without_comma_ends_at_marker():
 def test_kazakh_street_half_keeps_house():
     v = parse_address("г. Алматы, ул. Абая/Абай көшесі 5, кв 3").values
     assert (v["street_name"], v["house"], v["apartment"]) == ("Абая", "5", "3")
+
+
+def test_country_word_as_street_name():
+    v = parse_address("Усть-Каменогорск, ул. Казахстан 59, кв. 101").values
+    assert (v["street_type"], v["street_name"], v["house"]) == ("улица", "Казахстан", "59")
+    assert parse_address("Республика Казахстан, г. Алматы, Абая 5").values["street_name"] == "Абая"
