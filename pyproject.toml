@@ -18,3 +18,7 @@ target-version = "py312"
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "RUF"]
 ignore = ["RUF001", "RUF002", "RUF003", "RUF012"]
+
+[tool.ruff.lint.flake8-bugbear]
+# Body/Query/File в аргументах по умолчанию — штатная идиома FastAPI.
+extend-immutable-calls = ["fastapi.Body", "fastapi.Query", "fastapi.File"]
