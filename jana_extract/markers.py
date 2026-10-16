@@ -86,7 +86,7 @@ def _table() -> dict[str, tuple[str, str | None]]:
         ),
         (ENTRANCE, None, "подъезд подьезд подезд под пд п-д подъ кіреберіс entrance"),
         (FLOOR, None, "этаж эт қабат кабат floor"),
-        (COUNTRY, None, "казахстан қазақстан рк kazakhstan kz республика"),
+        (COUNTRY, None, "казахстан қазақстан рк kazakhstan kz"),
         (
             LANDMARK,
             None,

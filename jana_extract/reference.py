@@ -88,6 +88,13 @@ class Reference:
                 if k and i not in self.settlement_index[k]:
                     self.settlement_index[k].append(i)
         self._settlement_keys = [k for k in self.settlement_index if len(k) >= 4]
+        # Города и посёлки: опечатки в них частые («Алмата»), а ложных
+        # совпадений меньше, чем среди 7000 сёл — порог ниже.
+        self._town_keys = [
+            k
+            for k in self._settlement_keys
+            if any(self.settlements[i].rank >= 3 for i in self.settlement_index[k])
+        ]
         self._district_keys = [k for k in self.district_index if len(k) >= 4]
         self._region_keys = [k for k in self.region_index if len(k) >= 4]
 
@@ -169,7 +176,7 @@ class Reference:
         idx = self.settlement_index.get(f) or self.settlement_index.get(core(text))
         score = 1.0
         if not idx and fuzzy and len(f) >= 5:
-            hit = self._fuzzy(f, self._settlement_keys, 88)
+            hit = self._fuzzy(f, self._town_keys, 80) or self._fuzzy(f, self._settlement_keys, 88)
             if hit:
                 idx, score = self.settlement_index[hit[0]], hit[1] * 0.9
         if not idx:
