@@ -31,7 +31,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from jana_extract.parser import FIELDS  # noqa: E402
+from jana_extract.parser import FIELDS
 
 OFFICIAL_GROUPS: dict[str, tuple[float, list[str]]] = {
     "address": (0.60, ["province", "city", "street_name", "house"]),
@@ -94,7 +94,9 @@ def evaluate(pred: list[dict], gold: list[dict], groups=OFFICIAL_GROUPS, punct="
         "per_field": {f: (ok / n if n else None) for f, (ok, n) in per.items()},
         "per_field_counts": {f: tuple(v) for f, v in per.items()},
         "score": sum(rec_scores) / len(rec_scores) if rec_scores else None,
-        "exact_records": sum(1 for s in rec_scores if s == 1.0) / len(rec_scores) if rec_scores else None,
+        "exact_records": sum(1 for s in rec_scores if s == 1.0) / len(rec_scores)
+        if rec_scores
+        else None,
     }
 
 
@@ -114,7 +116,9 @@ def report(res: dict, title: str) -> None:
         a = res["per_field"][f]
         ok, n = res["per_field_counts"][f]
         print(f"  {f:12s} {'—' if a is None else f'{a:.3f}'}  ({ok}/{n})")
-    print(f"  итог (среднее по записям): {res['score']:.4f}; записей без ошибок: {res['exact_records']:.3f}")
+    print(
+        f"  итог (среднее по записям): {res['score']:.4f}; записей без ошибок: {res['exact_records']:.3f}"
+    )
 
 
 def main(argv=None) -> int:
@@ -136,10 +140,14 @@ def main(argv=None) -> int:
     report(evaluate(pred, gold, groups, args.punct), "")
     other = evaluate(pred, gold, OFFICIAL_GROUPS if args.alt_groups else ALT_GROUPS, args.punct)
     other_p = evaluate(pred, gold, groups, "space" if args.punct == "delete" else "delete")
-    print(f"  чувствительность: другие группы → {other['score']:.4f}; другая пунктуация → {other_p['score']:.4f}")
+    print(
+        f"  чувствительность: другие группы → {other['score']:.4f}; другая пунктуация → {other_p['score']:.4f}"
+    )
     if args.show_errors:
         for r, p, g in zip(inp, pred, gold, strict=True):
-            bad = {f: (p.get(f), g[f]) for f in FIELDS if field_outcome(p, g, f, args.punct) is False}
+            bad = {
+                f: (p.get(f), g[f]) for f in FIELDS if field_outcome(p, g, f, args.punct) is False
+            }
             if bad:
                 print(" ", r["raw_address"], bad)
     return 0

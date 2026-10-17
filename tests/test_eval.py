@@ -8,10 +8,10 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 
-from eval import evaluate, field_outcome, norm, score_record  # noqa: E402
+from eval import evaluate, field_outcome, norm, score_record
 
-from jana_extract.parser import FIELDS  # noqa: E402
-from jana_extract.service import extract_batch  # noqa: E402
+from jana_extract.parser import FIELDS
+from jana_extract.service import extract_batch
 
 FIX = Path(__file__).parent / "fixtures"
 
@@ -69,3 +69,21 @@ def test_holdout_accuracy_floor():
     pred = extract_batch([{"id": i, "raw_address": c["raw"]} for i, c in enumerate(cases)])
     res = evaluate(pred, [c["expect"] for c in cases])
     assert res["score"] >= 0.97, res
+
+
+def test_synth_corpus_gold_is_consistent():
+    """Эталон синтетики: 11 полей, текстовые поля — подстроки raw."""
+    cases = json.loads((FIX / "synth_corpus.json").read_text(encoding="utf-8"))
+    assert len(cases) >= 1000
+    for c in cases:
+        assert set(c["expect"]) == set(FIELDS)
+        for f in set(FIELDS) - {"province", "district", "street_type"}:
+            v = c["expect"][f]
+            assert v is None or v in c["raw"], (f, v, c["raw"])
+
+
+def test_synth_accuracy_floor():
+    """Регрессионный порог на синтетике (baseline 0.9303): правки не должны его ронять."""
+    cases = json.loads((FIX / "synth_corpus.json").read_text(encoding="utf-8"))
+    pred = extract_batch([{"id": c["id"], "raw_address": c["raw"]} for c in cases])
+    assert evaluate(pred, [c["expect"] for c in cases])["score"] >= 0.929

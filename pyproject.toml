@@ -22,3 +22,8 @@ ignore = ["RUF001", "RUF002", "RUF003", "RUF012"]
 [tool.ruff.lint.flake8-bugbear]
 # Body/Query/File в аргументах по умолчанию — штатная идиома FastAPI.
 extend-immutable-calls = ["fastapi.Body", "fastapi.Query", "fastapi.File"]
+
+[tool.ruff.lint.per-file-ignores]
+# Отчётные инструменты: строки markdown-таблиц и консольного вывода.
+"tools/diagnose.py" = ["E501"]
+"tools/eval.py" = ["E501"]
