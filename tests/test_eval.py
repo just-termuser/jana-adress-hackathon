@@ -87,7 +87,7 @@ def test_synth_accuracy_floor():
     cases = json.loads((FIX / "synth_corpus.json").read_text(encoding="utf-8"))
     pred = extract_batch([{"id": c["id"], "raw_address": c["raw"]} for c in cases])
     res = evaluate(pred, [c["expect"] for c in cases], raws=[c["raw"] for c in cases])
-    assert res["score"] >= 0.9888, res  # трещотка: достигнуто 0.98888 (этап 2, конвенции)
+    assert res["score"] >= 0.9904, res  # трещотка: достигнуто 0.99045 (волна 1, класс 4)
 
 
 def test_district_counted_only_where_present_in_text():

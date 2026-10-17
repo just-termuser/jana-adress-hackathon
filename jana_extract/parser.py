@@ -24,6 +24,8 @@ import itertools
 import re
 from dataclasses import dataclass, field
 
+from rapidfuzz import fuzz
+
 from . import markers as M
 from .reference import Reference, Settlement, get_reference
 from .text import core, fold
@@ -49,6 +51,8 @@ FIELDS = (
 DISTRICT_SHARE_MIN = 0.75
 # Одноимённые НП без различающего контекста: город угадан по крупности.
 AMBIGUOUS_SETTLEMENT_PENALTY = 0.85
+# Сегмент считается повтором уже найденного города при сходстве не ниже порога.
+DUP_CITY_SIMILARITY = 85
 
 _STREET_ONLY_STOP = frozenset({M.CITY, M.SETTLEMENT, M.REGION, M.DISTRICT, M.COUNTRY})
 
@@ -131,6 +135,11 @@ class Parser:
             o = self._with_ord(t) if t.kind == NUM else t
             if o is not t:
                 o.used = how
+
+    @staticmethod
+    def _is_house_anchor(t: Token | None) -> bool:
+        """Номер дома, уже привязанный маркером, или сам маркер дома («д.», «дом»)."""
+        return t is not None and (t.used == "house" or (t.marker == M.HOUSE and t.used == "marker"))
 
     def _is_plain_word(self, t: Token | None) -> bool:
         return (
@@ -555,7 +564,9 @@ class Parser:
         if found:
             if have_city:
                 city = next(c for c in self.comps if c.kind in (M.CITY, M.SETTLEMENT))
-                if core(city.text(self.tk)) == core(text) or score < 1.0:
+                # Дубль — только повтор ЭТОГО города (в т.ч. с опечаткой). Слово,
+                # похожее на какой-то другой НП («Попова», «Ушкара»), — кандидат в улицу.
+                if fuzz.ratio(core(city.text(self.tk)), core(text)) >= DUP_CITY_SIMILARITY:
                     self._use(words, "dup")
                     return True
                 return False
@@ -596,16 +607,21 @@ class Parser:
                 j += 1
             last = run[-1]
             nxt = self._next(last)
-            if nxt is not None and nxt.kind == NUM and self.free(nxt):
-                score = 3
+            if nxt is not None and (
+                (nxt.kind == NUM and self.free(nxt)) or self._is_house_anchor(nxt)
+            ):
+                score = 3  # «Назарбаева 8», «Валиханва д. 50/2», «Ушкара 116дом»
             elif nxt is None:
-                # слово-сегмент, следом сегмент с номером
+                # слово-сегмент, следом сегмент с номером или с домом по маркеру
                 k = last.i + 1
+                first_after = self.toks[k] if k < len(self.toks) else None
                 while k < len(self.toks) and not self.free(self.toks[k]):
                     k += 1
                 after = self.toks[k] if k < len(self.toks) else None
                 if after is not None and after.kind == NUM and after.seg != last.seg:
                     score = 2
+                elif first_after is not None and self._is_house_anchor(first_after):
+                    score = 2  # «Попова, д. 210», «Ушкара, 116дом»
                 else:
                     score = 1
             else:
