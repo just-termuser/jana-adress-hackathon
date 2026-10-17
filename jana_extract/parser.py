@@ -168,6 +168,9 @@ class Parser:
         prev = self.toks[t.i - 1] if t.i > 0 else None
         nxt = self.toks[t.i + t.marker_len] if t.i + t.marker_len < len(self.toks) else None
         prev_street = prev is not None and prev.seg == t.seg and prev.marker in M.STREETISH
+        # «Батыс Қазақстан облысы»: «Қазақстан» — часть названия области.
+        if nxt is not None and nxt.seg == t.seg and nxt.marker == M.REGION:
+            return True
         next_street = (
             nxt is not None
             and nxt.seg == t.seg
