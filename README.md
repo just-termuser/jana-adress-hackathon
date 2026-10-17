@@ -4,13 +4,12 @@
 на поля и возвращает **ровно то, что написано**: «казибек би» остаётся «казибек би»,
 падежи и опечатки не трогаются. Работает полностью офлайн.
 
-> Это отдельный проект. SaaS-движок Jana Address Intelligence в корне репозитория
-> решает обратную задачу (нормализацию) и здесь не используется.
+> Это самостоятельный проект. Он не связан с SaaS-движком нормализации адресов
+> Jana Address Intelligence, который решает обратную задачу.
 
 ## Быстрый старт
 
 ```bash
-cd hackathon
 docker compose up --build        # http://localhost:8000 — интерфейс, /docs — Swagger
 ```
 
@@ -27,7 +26,6 @@ curl -X POST localhost:8000/parse/batch -H "Content-Type: application/json" \
 ### Локально, без Docker
 
 ```bash
-cd hackathon
 python -m venv .venv && . .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements-dev.txt
 uvicorn jana_extract.api:app --port 8000           # API + интерфейс
@@ -138,14 +136,15 @@ raw_address
 | Улица/мкр → район для Алматы, Астаны, Шымкента | point-in-polygon при сборке | ≈ 10 200 |
 
 Полигоны используются только при сборке. В рантайм уходят плоские таблицы. Сам
-PBF в репозиторий и образ не попадает (`osm/` в `.gitignore`).
+PBF в репозиторий и образ не попадает (`osm/` в `.gitignore`). Для пересборки
+положите `kazakhstan-261015.osm.pbf` (Geofabrik) в папку `osm/` в корне репозитория.
 
 Пересборка:
 
 ```bash
 # локально (нужны osmium и shapely)
 pip install -r requirements-build.txt
-python tools/build_reference.py --pbf ../osm/kazakhstan-261015.osm.pbf
+python tools/build_reference.py --pbf osm/kazakhstan-261015.osm.pbf
 
 # или в Docker
 docker compose --profile build-reference run --rm build-reference

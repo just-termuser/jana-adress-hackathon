@@ -6,3 +6,8 @@
 tests
 *.md
 !README.md
+osm
+*.pbf
+.env
+.env.*
+.git

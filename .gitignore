@@ -6,3 +6,27 @@ data/*.tmp
 bench_*.json
 .scratch/
 data/reference.docker.json.gz
+
+# Исходные OSM-выгрузки: в репозиторий попадает только data/reference.json.gz
+osm/
+*.osm.pbf
+*.pbf
+
+# Локальные базы, секреты, окружения
+*.sqlite
+*.sqlite3
+*.db
+.env
+.env.*
+*.pem
+*.key
+secrets*.json
+venv/
+env/
+.mypy_cache/
+.coverage
+*.log
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
