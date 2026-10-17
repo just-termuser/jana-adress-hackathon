@@ -386,6 +386,47 @@ class Parser:
                 self.comps.append(Comp(M.CITY, part, marked=False, conf=0.8))
                 return
 
+    def step_dup_city(self) -> None:
+        """Повтор найденного города: «г. Шымкент, Шымкент, мкр 28», «Эмба, г. Эмба»,
+        «Жангизтобе г. Жангизтобе Уалихонов даңғылы», «г. Астана Астана Сарын».
+
+        Свободные слова, в точности (по fold) равные городу, — повтор, если это целый
+        сегмент или начало более длинной серии слов. Не повтор: слово сразу после
+        маркера улицы («ул. Астана») и название прямо перед постфиксным маркером
+        улицы («Астана көшесі»)."""
+        cities = [c for c in self.comps if c.kind in (M.CITY, M.SETTLEMENT)]
+        if not cities:
+            return
+        names = {tuple(fold(t.text) for t in c.toks) for c in cities}
+        for t in self.toks:
+            if not self._is_plain_word(t):
+                continue
+            prev = self.toks[t.i - 1] if t.i > 0 else None
+            if (
+                prev is not None
+                and prev.seg == t.seg
+                and (self._is_plain_word(prev) or prev.marker in M.STREETISH)
+            ):
+                continue  # не начало серии слов или имя после «ул.»
+            for name in names:
+                k = len(name)
+                part = self.toks[t.i : t.i + k]
+                if len(part) != k or not all(
+                    self._is_plain_word(x) and x.seg == t.seg for x in part
+                ):
+                    continue
+                if tuple(x.f for x in part) != name:
+                    continue
+                after = self.toks[t.i + k] if t.i + k < len(self.toks) else None
+                same_seg_after = after is not None and after.seg == t.seg
+                whole_segment = not same_seg_after
+                longer_run = same_seg_after and self._is_plain_word(after)
+                if same_seg_after and after.marker in M.STREETISH and after.f in M.POSTFIX_LANG:
+                    continue  # «Астана көшесі» — улица
+                if whole_segment or longer_run:
+                    self._use(part, "dup")
+                break
+
     # -- улицы, микрорайоны, ЖК
 
     def _has_later_free_num(self, after: Token) -> bool:
@@ -967,6 +1008,7 @@ class Parser:
         self.step_admin_markers()
         self._prelim_region()  # область нужна, чтобы искать город после неё
         self.step_leading_city()
+        self.step_dup_city()
         self._prelim_region()
         # Ориентир — до улиц: иначе «улица Аккожа Би 178 за мечетью» без запятых
         # затягивает номер и ориентир в название улицы.
