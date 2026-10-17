@@ -111,7 +111,7 @@ def test_district_restoration_precision_floor():
     pred = extract_batch([{"id": c["id"], "raw_address": c["raw"]} for c in cases])
     dr = district_restoration(pred, [c["expect"] for c in cases], [c["raw"] for c in cases])
     assert dr["precision"] >= 0.9863, dr  # корпус v5, волна 3: 0.98637
-    assert dr["coverage"] >= 0.9317, dr  # корпус v5: 0.93175
+    assert dr["coverage"] >= 0.9325, dr  # корпус v5, волна 3: 0.93254
 
 
 def test_synth_landmark_floor():

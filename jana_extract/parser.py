@@ -54,6 +54,9 @@ AMBIGUOUS_SETTLEMENT_PENALTY = 0.85
 # Улица/мкр — улика для выбора среди одноимённых НП, только если встречается
 # не более чем в стольких областях.
 EVIDENCE_MAX_REGIONS = 3
+# Название, которое есть как улица/мкр в стольких областях, — типичная «именная»
+# улица: нечёткий город и сельский НП без контекста её не перехватывают.
+COMMON_STREET_REGIONS = 4
 # Город выбран среди одноимённых по улике (а не по области из строки).
 EVIDENCE_PENALTY = 0.9
 # Сегмент считается повтором уже найденного города при сходстве не ниже порога.
@@ -403,6 +406,20 @@ class Parser:
                 self._use(part, M.CITY)
                 self.comps.append(Comp(M.CITY, part, marked=False, conf=0.8))
                 return
+        # Точного совпадения нет: опечатка в городе без маркера («Каратоу Атырау 3
+        # микрорайон», «Алмоты Аккайын д. 158») — только первое слово, с защитой.
+        first_word = run[:1]
+        after = self.toks[first.i + 1] if first.i + 1 < len(self.toks) else None
+        if (
+            first_word
+            and after is not None
+            and after.seg == first.seg
+            and after.marker not in M.ADMIN
+            and not (after.marker in M.STREETISH and self._is_postfix_street_marker(after))
+            and self._fuzzy_town(first_word)
+        ):
+            self._use(first_word, M.CITY)
+            self.comps.append(Comp(M.CITY, first_word, marked=False, conf=0.7))
 
     def step_dup_city(self) -> None:
         """Повтор найденного города: «г. Шымкент, Шымкент, мкр 28», «Эмба, г. Эмба»,
@@ -634,6 +651,28 @@ class Parser:
             segs.setdefault(t.seg, []).append(t)
         return list(segs.values())
 
+    def _is_common_street(self, key: str) -> bool:
+        """Название улицы/мкр, встречающееся во многих областях («Сатпаева» — в 19)."""
+        return len(self.ref.key_regions(key)) >= COMMON_STREET_REGIONS
+
+    def _fuzzy_town(self, toks: list[Token]) -> list[Settlement]:
+        """Нечёткий поиск города без маркера («Каратоу», «Алмоты», «Шимкент»).
+
+        Только среди городов и посёлков (ранг ≥ 3; при известной области — в ней),
+        слово не короче 5 букв, и это не распространённое название улицы:
+        «Сатпаева», «Жансугурова» не должны становиться городами Сатпаев/Жансугуров."""
+        text = self.tk.span(toks[0], toks[-1])
+        if len(fold(text)) < 5 or any(t.marker is not None for t in toks):
+            return []
+        if self._is_common_street(core(text)):
+            return []
+        found, score = self.ref.find_settlement(text, fuzzy=True)
+        if score >= 1.0:
+            return []  # точные совпадения обрабатываются отдельно
+        return [
+            s for s in found if s.rank >= 3 and (self.region is None or s.region == self.region)
+        ]
+
     def _is_postfix_street_marker(self, m: Token) -> bool:
         """Маркер улицы/мкр стоит ПОСЛЕ названия: за ним нет ни слова, ни свободного
         номера-названия («Темиртау ул.,», «Жертумсык микрорайон 51дом»). Префиксный
@@ -716,6 +755,7 @@ class Parser:
                     have_city,
                     allow_fuzzy=not first_content_seen,
                     street_like=next_starts_num and (have_city or self._is_house_anchor(following)),
+                    before_number=next_starts_num,
                 ):
                     have_city = have_city or any(
                         c.kind in (M.CITY, M.SETTLEMENT) for c in self.comps
@@ -738,7 +778,9 @@ class Parser:
                         break
             first_content_seen = True
 
-    def _try_admin(self, words, text, have_city, allow_fuzzy, street_like) -> bool:
+    def _try_admin(
+        self, words, text, have_city, allow_fuzzy, street_like, before_number=False
+    ) -> bool:
         reg = self.ref.find_region(text, fuzzy=False)
         # «Алматы» — и регион, и город: для городов респ. значения это city.
         if reg and not self.ref.is_republican_city(reg[0]):
@@ -755,6 +797,19 @@ class Parser:
         if street_like:
             return False
         found, score = self.ref.find_settlement(text, fuzzy=allow_fuzzy)
+        if found and score < 1.0 and not self._fuzzy_town(words):
+            # Нечёткое совпадение без защиты (распространённая улица, не город) — не город.
+            found = []
+        if (
+            found
+            and before_number
+            and not have_city
+            and self.region is None  # с областью из строки село этой области — сильная улика
+            and all(s.rank <= 2 for s in found)
+            and self._is_common_street(core(text))
+        ):
+            # «Сатпаева, 5, кв 3»: село «Сатпаева» есть, но перед номером дома это улица.
+            return False
         if found:
             if have_city:
                 city = next(c for c in self.comps if c.kind in (M.CITY, M.SETTLEMENT))
