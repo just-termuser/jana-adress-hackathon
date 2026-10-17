@@ -77,6 +77,10 @@ class Ref:
         self.city_streets = r["city_streets"]
         self.city_areas = r["city_areas"]
         self.area_names = [k for k, c in r["area_names"].items() if c >= 3 and self._good_area(k)]
+        # Мкр/ЖК своей области: в реальных адресах мкр относится к своему городу.
+        self.region_areas = {
+            int(k): [x for x in v if self._good_area(x)] for k, v in r["region_areas"].items()
+        }
 
     @staticmethod
     def _good_name(k: str) -> bool:
@@ -267,7 +271,8 @@ def gen_record(rnd: random.Random, ref: Ref, i: int) -> dict:
             cand = [k for k in rnd.sample(sorted(city_areas), 40) if Ref._good_area(k)]
             if cand:
                 return cand[0], city_areas[cand[0]]
-        return rnd.choice(ref.area_names), None
+        own = ref.region_areas.get(reg_idx)
+        return (rnd.choice(own) if own else rnd.choice(ref.area_names)), None
 
     def majority(counts):
         """«Истинный» район конкретного адреса: выбирается пропорционально числу
@@ -389,7 +394,8 @@ def gen_record(rnd: random.Random, ref: Ref, i: int) -> dict:
         gold.update(living_area=an, street_type=t, street_name=street_name)
         area_key, use_street_key = ak, True
     elif style == "zhk_plus_street":
-        zk = title(rnd.choice(ref.area_names))
+        own = ref.region_areas.get(reg_idx)
+        zk = title(rnd.choice(own) if own else rnd.choice(ref.area_names))
         parts.append(rnd.choice(["ЖК {}", 'ЖК "{}"', "жк {}"]).format(zk))
         t, form = rnd.choice([("улица", "ул. {}"), ("проспект", "пр. {}"), (None, "{}")])
         parts.append(form.format(street_name))
