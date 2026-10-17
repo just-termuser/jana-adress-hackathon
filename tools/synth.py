@@ -28,7 +28,7 @@ sys.path.insert(0, str(ROOT))
 from jana_extract.markers import SINGLE  # noqa: E402
 from jana_extract.parser import FIELDS  # noqa: E402
 from jana_extract.reference import Reference  # noqa: E402
-from jana_extract.text import fold, has_kazakh_letters  # noqa: E402
+from jana_extract.text import core, fold, has_kazakh_letters  # noqa: E402
 
 REPUBLICAN = ("Алматы", "Астана", "Шымкент")
 INVIS = ["​", " ", "­", "﻿"]
@@ -98,6 +98,13 @@ class Ref:
 
     def district_name(self, idx):
         return None if idx is None else self.districts[idx]["name"]
+
+    def counts(self, city: str, key: str) -> dict[str, int] | None:
+        merged: dict[str, int] = {}
+        for table in (self.city_areas, self.city_streets):
+            for d, c in table.get(city, {}).get(key, {}).items():
+                merged[d] = merged.get(d, 0) + c
+        return merged or None
 
     def unambiguous_district(self, settlement: dict, region_ctx: int | None) -> str | None:
         """Район НП, если «НП → район» однозначно по справочнику и контексту строки.
@@ -270,7 +277,8 @@ def gen_record(rnd: random.Random, ref: Ref, i: int) -> dict:
         d = rnd.choices(ds, [counts[k] for k in ds])[0]
         return ref.districts[int(d)]["name"]
 
-    street_key, street_counts = pick_street()
+    street_key, _street_counts = pick_street()
+    use_street_key = False
     street_name = title(street_key)
     if rnd.random() < 0.05:
         street_name = typo(rnd, street_name)
@@ -308,6 +316,7 @@ def gen_record(rnd: random.Random, ref: Ref, i: int) -> dict:
     )[0]
     tags.append(f"street:{style}")
     house_done = False
+    area_key: str | None = None  # самый локальный объект: мкр / ЖМ / ЖК / квартал
     merged_into_mkr = False
     if style == "typed":
         t, form = rnd.choice(
@@ -324,74 +333,76 @@ def gen_record(rnd: random.Random, ref: Ref, i: int) -> dict:
         )
         parts.append(form.format(street_name))
         gold.update(street_type=t, street_name=street_name)
-        gold["district"] = gold["district"] or majority(street_counts)
+        use_street_key = True
     elif style == "typed_post":
         t, form = rnd.choice(
             [("улица", "{} ул."), ("улица", "{} улица"), ("проспект", "{} проспект")]
         )
         parts.append(form.format(street_name))
         gold.update(street_type=t, street_name=street_name)
-        gold["district"] = gold["district"] or majority(street_counts)
+        use_street_key = True
     elif style == "kk_typed":
         t, form = rnd.choice([("улица", "{} көшесі"), ("проспект", "{} даңғылы")])
         parts.append(form.format(street_name))
         gold.update(street_type=t, street_name=street_name)
-        gold["district"] = gold["district"] or majority(street_counts)
+        use_street_key = True
     elif style == "plain":
         parts.append(street_name)
         gold.update(street_name=street_name)
-        gold["district"] = gold["district"] or majority(street_counts)
+        use_street_key = True
     elif style == "glued":
         parts.append(f"{street_name}{house}")
         gold.update(street_name=street_name, house=house)
-        gold["district"] = gold["district"] or majority(street_counts)
+        use_street_key = True
         house_done = True
         tags.append("glued_street_house")
     elif style == "mkr_named":
-        ak, acounts = pick_area()
+        ak, _acounts = pick_area()
         an = title(ak)
         form = rnd.choice(["мкр {}", "мкр. {}", "микрорайон {}", "мкрн {}", "{} мкр"])
         mkr_prefix = not form.startswith("{}")
         parts.append(form.format(an))
         gold.update(street_type="микрорайон", street_name=an)
-        gold["district"] = gold["district"] or majority(acounts)
+        area_key = ak
     elif style == "mkr_number":
         n = str(rnd.randint(1, 32))
         form = rnd.choice(["{} мкр", "мкр {}", "мкр. {}", "{} микрорайон", "{}-й микрорайон"])
         text = form.format(n)
         parts.append(text)
         gold.update(street_type="микрорайон", street_name=n)
+        area_key = n
         tags.append("mkr_number_name")
     elif style == "kvartal_glued":
         n = str(rnd.randint(1, 90))
         parts.append(f"{n}квартал")
         gold.update(street_type="квартал", street_name=n)
+        area_key = n
         tags.append("glued_kvartal")
     elif style == "mkr_plus_street":
-        ak, acounts = pick_area()
+        ak, _acounts = pick_area()
         an = title(ak)
         parts.append(rnd.choice(["мкр {}", "мкр. {}", "микрорайон {}"]).format(an))
         t, form = rnd.choice([("улица", "ул. {}"), ("улица", "улица {}"), ("проспект", "пр. {}")])
         parts.append(form.format(street_name))
         gold.update(living_area=an, street_type=t, street_name=street_name)
-        gold["district"] = gold["district"] or majority(acounts) or majority(street_counts)
+        area_key, use_street_key = ak, True
     elif style == "zhk_plus_street":
         zk = title(rnd.choice(ref.area_names))
         parts.append(rnd.choice(["ЖК {}", 'ЖК "{}"', "жк {}"]).format(zk))
         t, form = rnd.choice([("улица", "ул. {}"), ("проспект", "пр. {}"), (None, "{}")])
         parts.append(form.format(street_name))
         gold.update(living_area=zk, street_type=t, street_name=street_name)
-        gold["district"] = gold["district"] or majority(street_counts)
+        area_key, use_street_key = core(zk), True
         tags.append("zhk")
     elif style == "mkr_postfix_glued":
-        ak, acounts = pick_area()
+        ak, _acounts = pick_area()
         an = title(ak)
         ent = str(rnd.randint(1, 9))
         apt = str(rnd.randint(1, 300))
         h = str(rnd.randint(1, 60))
         parts.append(f"{an} микрорайон {h}дом {ent} {rnd.choice(['подьезд', 'подъезд'])} {apt} кв")
         gold.update(street_type="микрорайон", street_name=an, house=h, entrance=ent, apartment=apt)
-        gold["district"] = gold["district"] or majority(acounts)
+        area_key = ak
         house_done = True
         tags.append("spec_nursity_like")
 
@@ -460,11 +471,17 @@ def gen_record(rnd: random.Random, ref: Ref, i: int) -> dict:
         gold["landmark"] = lm
         tags.append("landmark")
 
+    if kind == "rep" and not district_from_text:
+        # Истинный район адреса — из распределения самого локального объекта:
+        # сначала мкр/ЖМ/ЖК, затем улица (та же объединённая таблица, что в справочнике).
+        for key in (area_key, street_key if use_street_key else None):
+            counts = ref.counts(region["name"], key) if key else None
+            if counts:
+                gold["district"] = majority(counts)
+                break
     if district_instead:
-        d_name = (
-            gold["district"]
-            or majority(street_counts)
-            or rnd.choice([d["name"] for d in ref.districts if d["city"] == region["name"]])
+        d_name = gold["district"] or rnd.choice(
+            [d["name"] for d in ref.districts if d["city"] == region["name"]]
         )
         gold["district"] = d_name
         parts.insert(0, rnd.choice([f"{d_name} район", f"{d_name} р-н"]))
