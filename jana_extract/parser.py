@@ -277,6 +277,11 @@ class Parser:
                 if not found:
                     before = before[-1:]
                     found, _ = self.ref.find_settlement(before[0].text, False)
+                if not found:
+                    # «Астона г», «Байконир г»: опечатка рядом с маркером города —
+                    # нечёткий поиск, но только среди городов и посёлков.
+                    fz, _ = self.ref.find_settlement(before[0].text, fuzzy=True)
+                    found = [s for s in fz if s.rank >= 3]
                 if found:
                     short = False
                     t.f = "қаласы"  # трактуем как постфиксный маркер
