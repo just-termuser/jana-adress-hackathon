@@ -25,7 +25,7 @@ gold = [c["expect"] for c in C]
 raw = [c["raw"] for c in C]
 tags = [set(c["tags"]) for c in C]
 out = extract_batch([{"id": c["id"], "raw_address": c["raw"]} for c in C], debug=True)
-base = evaluate(out, gold)["score"]
+base = evaluate(out, gold, raws=raw)["score"]
 
 
 def bad(i, f):
@@ -40,7 +40,7 @@ def gain(ids, fields=None):
             for f in fields or FIELDS:
                 o[f] = gold[i][f]
         fx.append(o)
-    return (evaluate(fx, gold)["score"] - base) * 100
+    return (evaluate(fx, gold, raws=raw)["score"] - base) * 100
 
 
 classes = {}

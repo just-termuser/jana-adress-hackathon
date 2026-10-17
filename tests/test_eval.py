@@ -67,8 +67,8 @@ def test_sample_output_all_11_fields_exact():
 def test_holdout_accuracy_floor():
     cases = json.loads((FIX / "holdout_cases.json").read_text(encoding="utf-8"))
     pred = extract_batch([{"id": i, "raw_address": c["raw"]} for i, c in enumerate(cases)])
-    res = evaluate(pred, [c["expect"] for c in cases])
-    assert res["score"] >= 0.97, res
+    res = evaluate(pred, [c["expect"] for c in cases], raws=[c["raw"] for c in cases])
+    assert res["score"] >= 0.988, res  # трещотка: достигнуто 0.9882
 
 
 def test_synth_corpus_gold_is_consistent():
@@ -83,7 +83,19 @@ def test_synth_corpus_gold_is_consistent():
 
 
 def test_synth_accuracy_floor():
-    """Регрессионный порог на синтетике (baseline 0.9303): правки не должны его ронять."""
+    """Трещотка на синтетике (район — только где он есть в строке, как в ТЗ)."""
     cases = json.loads((FIX / "synth_corpus.json").read_text(encoding="utf-8"))
     pred = extract_batch([{"id": c["id"], "raw_address": c["raw"]} for c in cases])
-    assert evaluate(pred, [c["expect"] for c in cases])["score"] >= 0.929
+    res = evaluate(pred, [c["expect"] for c in cases], raws=[c["raw"] for c in cases])
+    assert res["score"] >= 0.987, res  # достигнуто 0.9872
+
+
+def test_district_counted_only_where_present_in_text():
+    gold = dict.fromkeys(FIELDS)
+    gold.update(city="Алматы", house="5", district="Ауэзовский")
+    pred = dict(gold, district=None)
+    raw_without = "г. Алматы, ул. Абая 5"
+    raw_with = "г. Алматы, Ауэзовский р-н, ул. Абая 5"
+    assert evaluate([pred], [gold], raws=[raw_without])["score"] == 1.0
+    assert evaluate([pred], [gold], raws=[raw_with])["score"] < 1.0
+    assert evaluate([pred], [gold], raws=[raw_without], district_scope="all")["score"] < 1.0

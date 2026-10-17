@@ -24,7 +24,15 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tools"))
 
-from eval import OFFICIAL_GROUPS, evaluate, field_outcome, norm, score_record  # noqa: E402
+from eval import (  # noqa: E402
+    OFFICIAL_GROUPS,
+    district_restoration,
+    evaluate,
+    field_outcome,
+    norm,
+    scope_gold,
+    score_record,
+)
 
 from jana_extract.parser import FIELDS  # noqa: E402
 from jana_extract.service import extract_batch  # noqa: E402
@@ -84,7 +92,13 @@ def main(argv=None) -> int:
     ap.add_argument("--examples", type=int, default=4)
     args = ap.parse_args(argv)
 
-    recs, gold, tags = load(args)
+    recs, gold_full, tags = load(args)
+    # Район в метрике — только там, где он есть в строке (правило ТЗ);
+    # восстановление района оценивается отдельно (раздел 0).
+    gold = [
+        None if g is None else scope_gold([g], [r["raw_address"]], "text")[0]
+        for g, r in zip(gold_full, recs, strict=True)
+    ]
     out = extract_batch(recs, debug=True)
     n = len(out)
     L: list[str] = []
@@ -107,6 +121,20 @@ def main(argv=None) -> int:
                 f"| {f} | {'—' if a is None else f'{a:.3f}'} | {ok}/{cnt} | {FIELD_WEIGHT.get(f, 'вне групп')} |"
             )
         w("")
+
+    if labeled:
+        dr = district_restoration(
+            [out[i] for i in labeled],
+            [gold_full[i] for i in labeled],
+            [recs[i]["raw_address"] for i in labeled],
+        )
+        if dr["records"]:
+            w("## 0. Восстановление района (нет в строке; вне автоматической метрики)\n")
+            w(
+                f"Записей с районом в эталоне, но не в строке: {dr['records']}; "
+                f"покрытие {dr['coverage']:.3f}, точность {dr['precision']:.3f}; "
+                f"район выдан при пустом эталоне: {dr['emitted_when_gold_null']}.\n"
+            )
 
     # ------------------------------------------------------------ покрытие
     w("## 1. Пустые ключевые поля\n")
