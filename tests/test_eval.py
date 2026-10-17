@@ -87,7 +87,7 @@ def test_synth_accuracy_floor():
     cases = json.loads((FIX / "synth_corpus.json").read_text(encoding="utf-8"))
     pred = extract_batch([{"id": c["id"], "raw_address": c["raw"]} for c in cases])
     res = evaluate(pred, [c["expect"] for c in cases], raws=[c["raw"] for c in cases])
-    assert res["score"] >= 0.987, res  # достигнуто 0.9872
+    assert res["score"] >= 0.9888, res  # трещотка: достигнуто 0.98888 (этап 2, конвенции)
 
 
 def test_district_counted_only_where_present_in_text():
@@ -99,3 +99,14 @@ def test_district_counted_only_where_present_in_text():
     assert evaluate([pred], [gold], raws=[raw_without])["score"] == 1.0
     assert evaluate([pred], [gold], raws=[raw_with])["score"] < 1.0
     assert evaluate([pred], [gold], raws=[raw_without], district_scope="all")["score"] < 1.0
+
+
+def test_district_restoration_precision_floor():
+    """Восстановленный район (для защиты): точность важнее полноты."""
+    from eval import district_restoration
+
+    cases = json.loads((FIX / "synth_corpus.json").read_text(encoding="utf-8"))
+    pred = extract_batch([{"id": c["id"], "raw_address": c["raw"]} for c in cases])
+    dr = district_restoration(pred, [c["expect"] for c in cases], [c["raw"] for c in cases])
+    assert dr["precision"] >= 0.99, dr  # достигнуто 0.990
+    assert dr["coverage"] >= 0.9176, dr  # достигнуто 0.91770

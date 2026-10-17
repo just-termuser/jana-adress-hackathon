@@ -43,6 +43,13 @@ FIELDS = (
     "landmark",
 )
 
+# Район по улице/мкр в городах респ. значения выдаётся при доле адресов в одном
+# районе не ниже порога. 0.75 выбран по кривой «порог → точность/покрытие»
+# (tools/district_study.py, reports/stage2.md): точность важнее полноты.
+DISTRICT_SHARE_MIN = 0.75
+# Одноимённые НП без различающего контекста: город угадан по крупности.
+AMBIGUOUS_SETTLEMENT_PENALTY = 0.85
+
 _STREET_ONLY_STOP = frozenset({M.CITY, M.SETTLEMENT, M.REGION, M.DISTRICT, M.COUNTRY})
 
 
@@ -262,6 +269,10 @@ class Parser:
             )
             if short:
                 cands = [after] if after else []
+            elif t.f in M.POSTFIX_LANG:
+                # «облысы», «ауданы», «қаласы» стоят ПОСЛЕ названия; следующее за
+                # ними слово — уже другой компонент («… облысы Казыгуртский район»).
+                cands = [before]
             elif postfix_first:
                 cands = [before, after]
             else:
@@ -705,6 +716,7 @@ class Parser:
                 district_conf = 0.6
 
         settlement: Settlement | None = None
+        settlement_unique = False
         city_conf = 0.0
         if city_c:
             v["city"] = city_c.text(self.tk)
@@ -716,6 +728,17 @@ class Parser:
                 # одноимённые НП без контекста: берём самый крупный, но с низким доверием
                 settlement = found[0]
                 score *= 0.6
+            # Однозначно = после учёта области/района из строки остался ровно один
+            # НП с таким названием. Перевес по рангу — догадка: район по ней не выводим.
+            pool = [
+                s
+                for s in found
+                if (region_idx is None or s.region == region_idx)
+                and (district_idx is None or s.district == district_idx)
+            ]
+            settlement_unique = settlement is not None and len(pool) == 1 and pool[0] is settlement
+            if settlement is not None and not settlement_unique:
+                score *= AMBIGUOUS_SETTLEMENT_PENALTY
             if settlement is not None:
                 city_conf = (0.97 if city_c.marked else 0.88) * score
             else:
@@ -773,14 +796,15 @@ class Parser:
         # --- district inference
         if district_idx is None and district_text is None:
             if region_idx is not None and self.ref.is_republican_city(region_idx):
-                for c in (street_c, living_c):
+                # Сначала самый локальный объект (мкр / ЖК), затем улица.
+                for c in (living_c, street_c):
                     if c is None:
                         continue
                     hit = self.ref.area_or_street_district(region_idx, core(c.text(self.tk)))
-                    if hit and hit[1] >= 0.6:
+                    if hit and hit[1] >= DISTRICT_SHARE_MIN:
                         district_idx, district_conf = hit[0], 0.5 + 0.4 * hit[1]
                         break
-            elif settlement is not None and settlement.district is not None:
+            elif settlement is not None and settlement_unique and settlement.district is not None:
                 d_name = self.ref.district_name(settlement.district) or ""
                 # «Конаев» внутри «Конаев» — это горадминистрация, а не район.
                 if core(d_name) != core(settlement.name):

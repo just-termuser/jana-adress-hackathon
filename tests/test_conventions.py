@@ -13,8 +13,6 @@ import pytest
 
 from jana_extract.parser import parse_address
 
-NOT_YET = pytest.mark.xfail(strict=True, reason="конвенция ещё не реализована")
-
 
 def district(raw):
     return parse_address(raw).values["district"]
@@ -23,12 +21,10 @@ def district(raw):
 # --------------------------------------------------------------------- 1
 
 
-@NOT_YET
 def test_ambiguous_settlement_gives_no_district():
     assert district("Алексеевка, ул. Абая 5") is None  # 10 одноимённых НП
 
 
-@NOT_YET
 def test_ambiguous_settlement_rank_dominance_is_not_enough():
     assert district("Боралдай, ул. Ленина 1") is None  # 3 одноимённых НП
 
@@ -41,7 +37,6 @@ def test_unique_district_centre_gets_its_district():
     assert district("Сарыагаш, ул. Абая 5") == "Сарыагашский"
 
 
-@NOT_YET
 def test_ambiguous_settlement_lowers_confidence():
     amb = parse_address("Алексеевка, ул. Абая 5").confidence
     uniq = parse_address("Сарыагаш, ул. Абая 5").confidence
@@ -51,12 +46,10 @@ def test_ambiguous_settlement_lowers_confidence():
 # --------------------------------------------------------------------- 2
 
 
-@NOT_YET
 def test_street_share_below_threshold_gives_null():
     assert district("г. Алматы, ул. Розыбакиева 100") is None  # доля 0.72
 
 
-@NOT_YET
 def test_street_share_just_below_threshold_gives_null():
     assert district("г. Алматы, ул. Жумабаева 10") is None  # доля 0.74
 
@@ -68,17 +61,14 @@ def test_street_in_single_district_gives_district():
 # --------------------------------------------------------------------- 3
 
 
-@NOT_YET
 def test_microdistrict_wins_over_street():
     assert district("г. Алматы, мкр Алгабас, ул. Садовникова 5") == "Алатауский"
 
 
-@NOT_YET
 def test_microdistrict_wins_over_street_other_district():
     assert district("г. Алматы, мкр Алгабас, ул. Майлина 5") == "Алатауский"
 
 
-@NOT_YET
 def test_microdistrict_wins_over_street_third():
     assert district("г. Алматы, мкр Алгабас, ул. Оренбургская 3") == "Алатауский"
 
@@ -103,3 +93,25 @@ def test_unknown_microdistrict_falls_back_to_street():
 def test_microdistrict_number_then_house(raw, street, house, apt):
     v = parse_address(raw).values
     assert (v["street_name"], v["house"], v["apartment"]) == (street, house, apt)
+
+
+# ------------------------------------------- защита от регрессии (часть класса 11)
+
+
+@pytest.mark.parametrize(
+    ("raw", "district"),
+    [
+        (
+            "Оңтүстік Қазақстан облысы Казыгуртский район с. Айнатас ул Жайшыбеков 169",
+            "Казыгуртский",
+        ),
+        ("Батыс Қазақстан облысы Байтерекский район п. Асан Ласточка дом 91", "Байтерекский"),
+        (
+            "Оңтүстік Қазақстан облысы Келесский р-н село Когерту улица Мокатаева д. 235",
+            "Келесский",
+        ),
+    ],
+)
+def test_kazakh_postfix_marker_does_not_steal_next_name(raw, district):
+    """«облысы» стоит после названия; следующее слово — уже район, а не область."""
+    assert parse_address(raw).values["district"] == district
