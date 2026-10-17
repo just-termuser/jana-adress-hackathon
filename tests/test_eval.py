@@ -87,7 +87,7 @@ def test_synth_accuracy_floor():
     cases = json.loads((FIX / "synth_corpus.json").read_text(encoding="utf-8"))
     pred = extract_batch([{"id": c["id"], "raw_address": c["raw"]} for c in cases])
     res = evaluate(pred, [c["expect"] for c in cases], raws=[c["raw"] for c in cases])
-    assert res["score"] >= 0.9904, res  # трещотка: достигнуто 0.99045 (волна 1, класс 4)
+    assert res["score"] >= 0.9943, res  # трещотка: достигнуто 0.99437 (волна 1, классы 4, 5, 2)
 
 
 def test_district_counted_only_where_present_in_text():
@@ -109,7 +109,7 @@ def test_district_restoration_precision_floor():
     pred = extract_batch([{"id": c["id"], "raw_address": c["raw"]} for c in cases])
     dr = district_restoration(pred, [c["expect"] for c in cases], [c["raw"] for c in cases])
     assert dr["precision"] >= 0.99, dr  # достигнуто 0.990
-    assert dr["coverage"] >= 0.9176, dr  # достигнуто 0.91770
+    assert dr["coverage"] >= 0.9325, dr  # достигнуто 0.93251 (волна 1)
 
 
 def test_synth_landmark_floor():

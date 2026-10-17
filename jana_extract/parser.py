@@ -262,6 +262,12 @@ class Parser:
             before = self._word_run(t.i - 1, -1, t.seg, 3)
             if short and after and not self._looks_like_name(after[0]):
                 after = []  # «рядом с мечетью» — не село
+            if short and after and before and t.marker == M.CITY:
+                # «шымкент г абылай хана»: «г» относится к тому соседу, который НП.
+                b_found, _ = self.ref.find_settlement(before[-1].text, False)
+                a_found, _ = self.ref.find_settlement(self.tk.span(after[0], after[-1]), False)
+                if b_found and not a_found:
+                    after = []
             if short and not after and before and t.marker == M.CITY:
                 # «Алматы г»: постфиксное «г» — только для известного НП.
                 found, _ = self.ref.find_settlement(self.tk.span(before[0], before[-1]), False)
@@ -330,13 +336,28 @@ class Parser:
         return n is not None and n.kind == NUM
 
     def step_leading_city(self) -> None:
-        """«Алматы Абая 5», «Актобе 11 мкр …»: город в начале строки без запятой."""
+        """Город в начале оставшегося текста без запятой: «Алматы Абая 5»,
+        «Актобе 11 мкр …», «Жамбылская обл Айша-Биби Гагарин Бурылысы д. 118а».
+
+        Начало — первый свободный токен после страны/индекса и уже разобранных
+        области/района. Если область известна, подходит любой НП этой области
+        (в т.ч. село); без области — только город или посёлок (ранг ≥ 3)."""
         if any(c.kind in (M.CITY, M.SETTLEMENT) for c in self.comps):
             return
         first = next(
-            (t for t in self.toks if not t.alt and t.used not in ("country", "postcode")), None
+            (
+                t
+                for t in self.toks
+                if not t.alt
+                and t.used is None
+                and t.kind != ORD
+                and t.used not in ("country", "postcode")
+            ),
+            None,
         )
-        if first is None or not self.free(first) or first.kind != WORD or first.marker is not None:
+        if first is None or first.kind != WORD or first.marker is not None:
+            return
+        if any(t.used is None and not t.alt and t.kind != ORD for t in self.toks[: first.i]):
             return
         run = self._word_run(first.i, 1, first.seg, 3)
         for k in range(len(run), 0, -1):
@@ -347,7 +368,12 @@ class Parser:
             if after.marker in M.ADMIN:
                 continue
             found, _ = self.ref.find_settlement(self.tk.span(part[0], part[-1]), False)
-            if found and found[0].rank >= 3:
+            if self.region is not None:
+                found = [s for s in found if s.region == self.region]
+                ok = bool(found)
+            else:
+                ok = bool(found) and found[0].rank >= 3
+            if ok:
                 self._use(part, M.CITY)
                 self.comps.append(Comp(M.CITY, part, marked=False, conf=0.8))
                 return
@@ -423,6 +449,9 @@ class Parser:
                 name = post
             elif m.f in M.POSTFIX_LANG and post:
                 name = post
+            elif not pre_words and post and post[-1].kind == NUM:
+                # «7-й микрорайон 73а»: номер мкр стоит перед маркером, после — дом.
+                name = post
             elif pre_words or (pre and not post_words):
                 name = pre
             elif post:
@@ -433,6 +462,8 @@ class Parser:
                 if m.marker == M.ZHK:
                     m.used = "marker"
                 continue
+            if name is pre and m.marker in (M.AREA, M.ZHK):
+                name = self._split_known_area(name)
             if name is pre and name[-1].kind == WORD and m.marker in (M.AREA, M.STREET):
                 self._maybe_extend_with_number(m, name)
             m.used = "marker"
@@ -442,6 +473,27 @@ class Parser:
                     m.marker, name, canon=m.canon, marked=True, alt=m.alt or name[0].alt, conf=0.95
                 )
             )
+
+    def _split_known_area(self, name: list[Token]) -> list[Token]:
+        """«ЖК Армандастар Сандыккол дом 180» без запятых: если начало названия —
+        известный мкр/ЖК, а целиком название неизвестно и дальше идёт дом,
+        оставшиеся слова — это улица."""
+        words = [t for t in name if t.kind == WORD]
+        if len(words) < 2 or len(words) != len(name):
+            return name
+        full = core(self.tk.span(name[0], name[-1]))
+        if self.ref.known_area(full, self.region) or self.ref.known_area(full):
+            return name
+        nxt = self._next(name[-1])
+        if not (
+            self._is_house_anchor(nxt) or (nxt is not None and nxt.kind == NUM and self.free(nxt))
+        ):
+            return name
+        for k in range(len(name) - 1, 0, -1):
+            key = core(self.tk.span(name[0], name[k - 1]))
+            if self.ref.known_area(key, self.region) or self.ref.known_area(key):
+                return name[:k]
+        return name
 
     def _maybe_extend_with_number(self, m: Token, name: list[Token]) -> None:
         """«мкр Аксай 3а, 59» — 3а часть названия; «ул Абая 5» — 5 это дом."""
@@ -905,6 +957,7 @@ class Parser:
         self.step_noise()
         self.step_number_markers()
         self.step_admin_markers()
+        self._prelim_region()  # область нужна, чтобы искать город после неё
         self.step_leading_city()
         self._prelim_region()
         # Ориентир — до улиц: иначе «улица Аккожа Би 178 за мечетью» без запятых
