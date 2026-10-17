@@ -1,26 +1,71 @@
-"""Регрессионный порог точности на отложенном наборе (ручная разметка по ТЗ)."""
+"""Симулятор метрики жюри и обязательные регрессионные пороги."""
 
 import json
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 
-from eval import evaluate, norm
+from eval import evaluate, field_outcome, norm, score_record  # noqa: E402
 
-from jana_extract.service import extract_batch
+from jana_extract.parser import FIELDS  # noqa: E402
+from jana_extract.service import extract_batch  # noqa: E402
 
 FIX = Path(__file__).parent / "fixtures"
 
 
-def test_jury_normalisation():
-    assert norm("Аксай-3а,") == "аксай 3а"
-    assert norm("Казыбек би") != norm("казибек би")  # опечатки не прощаются
+def test_norm_lower_no_punct_no_extra_spaces():
+    assert norm("  Аксай-3а, ") == "аксай3а"
+    assert norm("Аксай-3а", punct="space") == "аксай 3а"
+    assert norm("Казыбек   би") == "казыбек би"
     assert norm(None) is None
+    assert norm(" , ") is None
+
+
+def test_typos_cases_and_yo_are_not_forgiven():
+    assert norm("Казыбек би") != norm("казибек би")
+    assert norm("Абая") != norm("Абай")
+    assert norm("Королёва") != norm("Королева")
+
+
+def test_numbers_compared_as_strings():
+    assert field_outcome({"house": "1"}, {"house": "1/2"}, "house") is False
+    assert field_outcome({"house": "1/2"}, {"house": "1/2"}, "house") is True
+    assert field_outcome({"house": "12А"}, {"house": "12а"}, "house") is True
+
+
+def test_both_empty_field_is_excluded():
+    assert field_outcome({"floor": None}, {"floor": None}, "floor") is None
+    assert field_outcome({"floor": "3"}, {"floor": None}, "floor") is False
+    assert field_outcome({"floor": None}, {"floor": "3"}, "floor") is False
+    assert field_outcome({"floor": "3"}, {}, "floor") is None  # поле не размечено
+
+
+def test_group_weights_renormalised_to_present_groups():
+    gold = dict.fromkeys(FIELDS)
+    gold.update(city="Алматы", house="5")
+    pred = dict(gold)
+    assert score_record(pred, gold) == 1.0
+    pred["house"] = "6"  # 1 из 2 полей адреса; других групп в записи нет
+    assert score_record(pred, gold) == pytest.approx(0.5)
+    gold["apartment"] = pred["apartment"] = "7"  # детали верны: 0.6*0.5 + 0.25*1
+    assert score_record(pred, gold) == pytest.approx((0.6 * 0.5 + 0.25) / 0.85)
+
+
+def test_sample_output_all_11_fields_exact():
+    """Эталон организаторов: все 11 полей должны совпадать в точности."""
+    inp = json.loads((FIX / "sample_input.json").read_text(encoding="utf-8"))
+    gold = json.loads((FIX / "sample_output.json").read_text(encoding="utf-8"))
+    pred = extract_batch(inp)
+    for p, g in zip(pred, gold, strict=True):
+        for f in FIELDS:
+            assert p[f] == g[f], (f, p[f], g[f])  # строгое равенство, без нормализации
 
 
 def test_holdout_accuracy_floor():
     cases = json.loads((FIX / "holdout_cases.json").read_text(encoding="utf-8"))
     pred = extract_batch([{"id": i, "raw_address": c["raw"]} for i, c in enumerate(cases)])
     res = evaluate(pred, [c["expect"] for c in cases])
-    assert res["weighted"] >= 0.97, res
+    assert res["score"] >= 0.97, res
