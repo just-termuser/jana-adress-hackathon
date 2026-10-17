@@ -27,6 +27,7 @@ sys.path.insert(0, str(ROOT))
 
 from jana_extract.markers import SINGLE  # noqa: E402
 from jana_extract.parser import FIELDS  # noqa: E402
+from jana_extract.reference import Reference  # noqa: E402
 from jana_extract.text import fold, has_kazakh_letters  # noqa: E402
 
 REPUBLICAN = ("Алматы", "Астана", "Шымкент")
@@ -52,6 +53,9 @@ TYPO_SUBST = {"а": "о", "о": "а", "ы": "и", "и": "ы", "е": "и", "у": 
 class Ref:
     def __init__(self, path: Path) -> None:
         r = json.load(gzip.open(path, "rt", encoding="utf-8"))
+        for i, s in enumerate(r["settlements"]):
+            s["_idx"] = i
+        self.jref = Reference.load(path)
         self.regions = r["regions"]
         self.districts = r["districts"]
         bad = re.compile(r"администрац|әкімдіг|\d", re.I)
@@ -95,6 +99,23 @@ class Ref:
     def district_name(self, idx):
         return None if idx is None else self.districts[idx]["name"]
 
+    def unambiguous_district(self, settlement: dict, region_ctx: int | None) -> str | None:
+        """Район НП, если «НП → район» однозначно по справочнику и контексту строки.
+
+        Неоднозначно: одноимённые НП того же ранга, не различимые по области из
+        строки; НП — город областного значения (вне районов); «район» совпадает
+        с названием самого города (горадминистрация, как «Конаев»)."""
+        if settlement.get("district") is None:
+            return None
+        found, _ = self.jref.find_settlement(settlement["name"], fuzzy=False)
+        best = self.jref.best_settlement(found, region_ctx)
+        if best is None or best.idx != settlement["_idx"]:
+            return None
+        name = self.districts[settlement["district"]]["name"]
+        if fold(name) == fold(settlement["name"]):
+            return None
+        return name
+
 
 def title(k: str) -> str:
     return " ".join(w if w[:1].isdigit() else w[:1].upper() + w[1:] for w in k.split())
@@ -126,6 +147,7 @@ def gen_record(rnd: random.Random, ref: Ref, i: int) -> dict:
     pre: list[str] = []
 
     # ---------------------------------------------------------------- местность
+    mkr_prefix = False
     kind = rnd.choices(["rep", "city", "village"], [0.40, 0.40, 0.20])[0]
     if kind == "rep":
         rname = rnd.choice(REPUBLICAN)
@@ -163,7 +185,8 @@ def gen_record(rnd: random.Random, ref: Ref, i: int) -> dict:
         )
         parts.append(form)
         tags.append("district_in_text")
-    if kind == "village":
+    district_from_text = "district_in_text" in tags
+    if district_from_text:
         gold["district"] = ref.district_name(district_idx)
 
     # город
@@ -210,6 +233,12 @@ def gen_record(rnd: random.Random, ref: Ref, i: int) -> dict:
             parts.append(rnd.choice([f"г. {city_text}", city_text]))
             tags.append("city_duplicated")
     gold["city"] = None if city_omitted else city_text
+    if kind != "rep" and not district_from_text:
+        # Конвенция 1: район НП из справочника, если соответствие однозначно
+        # с учётом того, что есть в строке (область). Иначе null.
+        gold["district"] = ref.unambiguous_district(
+            settlement, reg_idx if "region_in_text" in tags else None
+        )
 
     # ---------------------------------------------------------------- улица
     pool = ref.region_streets.get(reg_idx) or ref.region_streets[next(iter(ref.region_streets))]
@@ -232,9 +261,13 @@ def gen_record(rnd: random.Random, ref: Ref, i: int) -> dict:
         return rnd.choice(ref.area_names), None
 
     def majority(counts):
+        """«Истинный» район конкретного адреса: выбирается пропорционально числу
+        адресов улицы/мкр в каждом районе. Так точность вывода района по
+        большинству честно падает на улицах, которые делят несколько районов."""
         if not counts:
             return None
-        d, _c = max(counts.items(), key=lambda kv: kv[1])
+        ds = sorted(counts)
+        d = rnd.choices(ds, [counts[k] for k in ds])[0]
         return ref.districts[int(d)]["name"]
 
     street_key, street_counts = pick_street()
@@ -275,6 +308,7 @@ def gen_record(rnd: random.Random, ref: Ref, i: int) -> dict:
     )[0]
     tags.append(f"street:{style}")
     house_done = False
+    merged_into_mkr = False
     if style == "typed":
         t, form = rnd.choice(
             [
@@ -317,6 +351,7 @@ def gen_record(rnd: random.Random, ref: Ref, i: int) -> dict:
         ak, acounts = pick_area()
         an = title(ak)
         form = rnd.choice(["мкр {}", "мкр. {}", "микрорайон {}", "мкрн {}", "{} мкр"])
+        mkr_prefix = not form.startswith("{}")
         parts.append(form.format(an))
         gold.update(street_type="микрорайон", street_name=an)
         gold["district"] = gold["district"] or majority(acounts)
@@ -375,6 +410,7 @@ def gen_record(rnd: random.Random, ref: Ref, i: int) -> dict:
         ):
             parts[-1] = f"{parts[-1]} {house}"  # «ул. Абая 5» в одном сегменте
             tags.append("house_in_street_segment")
+            merged_into_mkr = style == "mkr_named" and mkr_prefix
         else:
             parts.append(form.format(house))
         gold["house"] = house
@@ -400,6 +436,12 @@ def gen_record(rnd: random.Random, ref: Ref, i: int) -> dict:
                 tags.append("apartment_unmarked")
             parts.append(form.format(apt))
             gold["apartment"] = apt
+            if merged_into_mkr and form == "{}":
+                # Конвенция 4 («мкр Аксай 3а, 59», как в эталоне организаторов):
+                # число после маркера мкр — часть названия, следующее число — дом.
+                gold["street_name"] = f"{gold['street_name']} {house}"
+                gold["house"], gold["apartment"] = apt, None
+                tags.append("mkr_number_then_house")
         if gold["entrance"] is None and rnd.random() < 0.15:
             e = str(rnd.randint(1, 12))
             form = rnd.choice(["{}подьезд", "подъезд {}", "{} подъезд", "{} подьезд", "под. {}"])
