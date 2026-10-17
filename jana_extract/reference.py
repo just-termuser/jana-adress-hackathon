@@ -147,6 +147,30 @@ class Reference:
                 return self.region_index[hit[0]], hit[1] * 0.9
         return None
 
+    def district_candidates(self, text: str, fuzzy: bool = True) -> tuple[list[int], float]:
+        """Все районы с таким названием (их бывает несколько: «Абайский»)."""
+        f = " ".join(_DISTRICT_WORDS.sub(" ", fold(text)).split())
+        if not f:
+            return [], 0.0
+        cands = self.district_index.get(f)
+        if cands:
+            return list(cands), 1.0
+        if fuzzy:
+            hit = self._fuzzy(f, self._district_keys, 85)
+            if hit:
+                return list(self.district_index[hit[0]]), hit[1] * 0.9
+        return [], 0.0
+
+    def key_regions(self, key: str) -> set[int]:
+        """Области, где есть улица или мкр с таким ключом."""
+        out = {r for r, names in self.region_streets.items() if key in names}
+        out |= {r for r, names in self.region_areas.items() if key in names}
+        for table in (self.city_streets, self.city_areas):
+            for city, names in table.items():
+                if key in names:
+                    out.add(self.region_by_name[city])
+        return out
+
     def find_district(
         self, text: str, region: int | None = None, fuzzy: bool = True
     ) -> tuple[int, float] | None:

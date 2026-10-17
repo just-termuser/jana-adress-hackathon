@@ -51,6 +51,11 @@ FIELDS = (
 DISTRICT_SHARE_MIN = 0.75
 # Одноимённые НП без различающего контекста: город угадан по крупности.
 AMBIGUOUS_SETTLEMENT_PENALTY = 0.85
+# Улица/мкр — улика для выбора среди одноимённых НП, только если встречается
+# не более чем в стольких областях.
+EVIDENCE_MAX_REGIONS = 3
+# Город выбран среди одноимённых по улике (а не по области из строки).
+EVIDENCE_PENALTY = 0.9
 # Сегмент считается повтором уже найденного города при сходстве не ниже порога.
 DUP_CITY_SIMILARITY = 85
 
@@ -80,6 +85,8 @@ class Result:
     conf: dict[str, float] = field(default_factory=dict)
     spans: dict[str, tuple[int, int]] = field(default_factory=dict)
     leftovers: list[str] = field(default_factory=list)
+    # Неустранимая неоднозначность: поле -> кандидаты (для отладки и интерфейса).
+    ambiguity: dict[str, list[str]] = field(default_factory=dict)
     confidence: float = 0.0
 
 
@@ -785,6 +792,27 @@ class Parser:
         main = [c for c in cs if not c.alt]
         return (main or cs or [None])[0]
 
+    def _narrow_by_evidence(self, items: list, region_of, keys: list[str]) -> list:
+        """Оставляет кандидатов, в чьей области есть улица/мкр из строки.
+
+        Сужает, только если улика есть у части кандидатов (не у всех и не ни у кого)."""
+        # Улики применяются по очереди, от самой локальной (мкр/ЖК) к улице, и
+        # пересекаются: «Есиль р-н, мкр Чубары, пр. Кима» — Чубары есть только в Астане.
+        for k in keys:
+            if len(items) < 2:
+                break
+            # Улика — только специфичное название: с буквами, не короче 4 символов и
+            # не более чем в EVIDENCE_MAX_REGIONS областях («Абая», «26» — не улики).
+            if len(k) < 4 or not any(ch.isalpha() for ch in k):
+                continue
+            kr = self.ref.key_regions(k)
+            if not 0 < len(kr) <= EVIDENCE_MAX_REGIONS:
+                continue
+            hit = [x for x in items if region_of(x) in kr]
+            if hit and len(hit) < len(items):
+                items = hit
+        return items
+
     def _resolve_region(self, c: Comp) -> tuple[int, float] | None:
         """«Алматы обл» — это Алматинская область, а не город Алматы."""
         text = c.text(self.tk)
@@ -803,6 +831,15 @@ class Parser:
             if hit:
                 self.region = hit[0]
                 return
+        dis = self._pick(M.DISTRICT)
+        if dis:
+            # «Ауэзовский р-н, Аксай 3 микрорайон»: однозначный район задаёт область
+            # до поиска города, иначе «Аксай» уходит в одноимённый город ЗКО.
+            cands, _ = self.ref.district_candidates(dis.text(self.tk))
+            regions = {self.ref.districts[d]["region"] for d in cands}
+            if len(regions) == 1:
+                self.region = regions.pop()
+                return
         for c in self.comps:
             if c.kind in (M.CITY, M.SETTLEMENT):
                 found, _ = self.ref.find_settlement(c.text(self.tk))
@@ -815,82 +852,7 @@ class Parser:
         res = Result()
         v, cf = res.values, res.conf
 
-        # --- city
-        city_c = self._pick(M.CITY) or self._pick(M.SETTLEMENT)
-        cities = [c for c in self.comps if c.kind in (M.CITY, M.SETTLEMENT)]
-        if city_c is None and cities:
-            city_c = cities[0]
-        reg_c = self._pick(M.REGION)
-        dis_c = self._pick(M.DISTRICT)
-
-        region_idx: int | None = None
-        region_conf = 0.0
-        if reg_c:
-            hit = self._resolve_region(reg_c)
-            if hit:
-                region_idx, region_conf = hit[0], 0.95 * hit[1]
-
-        district_idx: int | None = None
-        district_conf = 0.0
-        district_text: str | None = None
-        if dis_c:
-            hit = self.ref.find_district(dis_c.text(self.tk), region=region_idx)
-            if hit is None:
-                hit = self.ref.find_district(dis_c.text(self.tk))
-                if hit and region_idx is not None:
-                    hit = (hit[0], hit[1] * 0.7)  # район из другой области — сомнительно
-            if hit:
-                district_idx, district_conf = hit[0], 0.95 * hit[1]
-            else:
-                district_text = re.sub(r"(?i)\b(район|р-н|ауданы|аудан)\b", "", dis_c.text(self.tk))
-                district_text = " ".join(district_text.split()) or None
-                district_conf = 0.6
-
-        settlement: Settlement | None = None
-        settlement_unique = False
-        city_conf = 0.0
-        if city_c:
-            v["city"] = city_c.text(self.tk)
-            res.spans["city"] = (city_c.toks[0].start, city_c.toks[-1].end)
-            found, score = self.ref.find_settlement(v["city"], fuzzy=True)
-            dis_for_pick = district_idx
-            settlement = self.ref.best_settlement(found, region_idx, dis_for_pick)
-            if found and settlement is None and region_idx is None:
-                # одноимённые НП без контекста: берём самый крупный, но с низким доверием
-                settlement = found[0]
-                score *= 0.6
-            # Однозначно = после учёта области/района из строки остался ровно один
-            # НП с таким названием. Перевес по рангу — догадка: район по ней не выводим.
-            pool = [
-                s
-                for s in found
-                if (region_idx is None or s.region == region_idx)
-                and (district_idx is None or s.district == district_idx)
-            ]
-            settlement_unique = settlement is not None and len(pool) == 1 and pool[0] is settlement
-            if settlement is not None and not settlement_unique:
-                score *= AMBIGUOUS_SETTLEMENT_PENALTY
-            if settlement is not None:
-                city_conf = (0.97 if city_c.marked else 0.88) * score
-            else:
-                city_conf = 0.7 if city_c.marked else 0.5
-            # город-курорт республиканского значения?
-            reg_hit = self.ref.find_region(v["city"], fuzzy=False)
-            if reg_hit and self.ref.is_republican_city(reg_hit[0]):
-                region_idx = region_idx if region_idx is not None else reg_hit[0]
-                region_conf = max(region_conf, 0.97)
-                settlement = None
-        if region_idx is None and settlement is not None:
-            region_idx = settlement.region
-            region_conf = 0.9 * city_conf
-        if region_idx is None and district_idx is not None:
-            region_idx = self.ref.districts[district_idx]["region"]
-            region_conf = 0.8 * district_conf
-        if region_idx is None and v["city"] is None:
-            # «вместо города — район»: район города респ. значения
-            pass
-
-        # --- street / living area
+        # --- street / living area (раньше админ. частей: это улики для одноимённых НП)
         streets = [c for c in self.comps if c.kind == M.STREET]
         areas = [c for c in self.comps if c.kind == M.AREA]
         zhks = [c for c in self.comps if c.kind == M.ZHK]
@@ -923,6 +885,111 @@ class Parser:
             v["living_area"] = living_c.text(self.tk)
             res.spans["living_area"] = (living_c.toks[0].start, living_c.toks[-1].end)
             cf["living_area"] = living_c.conf
+        evidence = [core(c.text(self.tk)) for c in (living_c, street_c) if c is not None]
+
+        # --- region / district / city
+        city_c = self._pick(M.CITY) or self._pick(M.SETTLEMENT)
+        cities = [c for c in self.comps if c.kind in (M.CITY, M.SETTLEMENT)]
+        if city_c is None and cities:
+            city_c = cities[0]
+        reg_c = self._pick(M.REGION)
+        dis_c = self._pick(M.DISTRICT)
+
+        region_idx: int | None = None
+        region_conf = 0.0
+        if reg_c:
+            hit = self._resolve_region(reg_c)
+            if hit:
+                region_idx, region_conf = hit[0], 0.95 * hit[1]
+
+        district_idx: int | None = None
+        district_conf = 0.0
+        district_text: str | None = None
+        district_regions: set[int] | None = None  # кандидаты-области неоднозначного района
+        if dis_c:
+            cands, dscore = self.ref.district_candidates(dis_c.text(self.tk))
+            if region_idx is not None and cands:
+                in_region = [d for d in cands if self.ref.districts[d]["region"] == region_idx]
+                if in_region:
+                    cands = in_region
+                else:
+                    dscore *= 0.7  # район из другой области — сомнительно
+            if len(cands) > 1:
+                cands = self._narrow_by_evidence(
+                    cands, lambda d: self.ref.districts[d]["region"], evidence
+                )
+            if len(cands) == 1:
+                district_idx, district_conf = cands[0], 0.95 * dscore
+            else:
+                names = {self.ref.districts[d]["name"] for d in cands}
+                if len(names) == 1:
+                    district_text = names.pop()  # имя одинаковое у всех кандидатов
+                else:
+                    district_text = re.sub(
+                        r"(?i)\b(район|р-н|ауданы|аудан)\b", "", dis_c.text(self.tk)
+                    )
+                    district_text = " ".join(district_text.split()) or None
+                district_conf = 0.6
+                if len(cands) > 1:
+                    district_regions = {self.ref.districts[d]["region"] for d in cands}
+
+        settlement: Settlement | None = None
+        settlement_unique = False
+        city_conf = 0.0
+        province_candidates: set[int] = set()
+        if city_c:
+            v["city"] = city_c.text(self.tk)
+            res.spans["city"] = (city_c.toks[0].start, city_c.toks[-1].end)
+            found, score = self.ref.find_settlement(v["city"], fuzzy=True)
+            # Сначала контекст строки: область и район.
+            pool = [
+                s
+                for s in found
+                if (region_idx is None or s.region == region_idx)
+                and (district_idx is None or s.district == district_idx)
+                and (district_regions is None or s.region in district_regions)
+            ]
+            # Затем улики: улица/мкр из строки, которые есть только у части кандидатов.
+            # Улика выбирает область, но район по ней не восстанавливаем: она
+            # слабее явной области в строке (точность важнее полноты).
+            unique_by_context = len(pool) == 1
+            if len(pool) > 1:
+                pool = self._narrow_by_evidence(pool, lambda s: s.region, evidence)
+            pool.sort(key=lambda s: (-s.rank, -s.pop))
+            if len(pool) == 1:
+                settlement, settlement_unique = pool[0], unique_by_context
+                if not unique_by_context:
+                    score *= EVIDENCE_PENALTY
+            elif len(pool) > 1:
+                province_candidates = {s.region for s in pool}
+                if pool[0].rank > pool[1].rank:
+                    # Явный лидер (город против одноимённых сёл): оставляем, но не молча —
+                    # кандидаты уходят в ambiguity, доверие ниже.
+                    settlement = pool[0]
+                    score *= AMBIGUOUS_SETTLEMENT_PENALTY
+            if settlement is not None:
+                city_conf = (0.97 if city_c.marked else 0.88) * score
+            else:
+                city_conf = 0.7 if city_c.marked else 0.5
+            # город республиканского значения?
+            reg_hit = self.ref.find_region(v["city"], fuzzy=False)
+            if reg_hit and self.ref.is_republican_city(reg_hit[0]):
+                region_idx = region_idx if region_idx is not None else reg_hit[0]
+                region_conf = max(region_conf, 0.97)
+                settlement = None
+                province_candidates = set()
+        if region_idx is None and settlement is not None:
+            region_idx = settlement.region
+            region_conf = 0.9 * city_conf
+        if region_idx is None and district_idx is not None:
+            region_idx = self.ref.districts[district_idx]["region"]
+            region_conf = 0.8 * district_conf
+        if region_idx is None and district_regions and not province_candidates:
+            province_candidates = set(district_regions)
+        if len(province_candidates) > 1:
+            res.ambiguity["province"] = sorted(
+                self.ref.region_name(r) or "" for r in province_candidates
+            )
 
         # --- district inference
         if district_idx is None and district_text is None:

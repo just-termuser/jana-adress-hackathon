@@ -48,6 +48,7 @@ def extract_record(item: Any, debug: bool = False, ref: Reference | None = None)
             "field_confidence": {k: round(v, 2) for k, v in res.conf.items()},
             "spans": res.spans,
             "leftovers": res.leftovers,
+            "ambiguity": res.ambiguity,
         }
     return out
 

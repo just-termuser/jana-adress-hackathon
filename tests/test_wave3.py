@@ -61,23 +61,22 @@ def test_street_named_like_city_stays_street():
 @pytest.mark.parametrize(
     ("raw", "province"),
     [
-        todo("абайский район,мкр финансист,д. 87/2,apt 76", "Шымкент"),
-        todo("абайский район,едил каган131", "Шымкент"),
-        todo("Есиль р-н, микрорайон Чубары, пр. Кима 72, кв 142", "Астана"),
-        todo("г.Аксу, Касымхана211", "Акмолинская область"),
-        todo("Актау, мкр. Токабай, ул. Златоустская, д. 154, кв. 286", "Карагандинская область"),
+        ("Абайский район, ул. Корганбай Омешулы, д. 126", "Шымкент"),  # улица только в Шымкенте
+        ("абайский район,мкр финансист,д. 87/2,apt 76", "Шымкент"),
+        ("абайский район,едил каган131", "Шымкент"),
+        ("Есиль р-н, микрорайон Чубары, пр. Кима 72, кв 142", "Астана"),
+        ("г.Аксу, Касымхана211", "Акмолинская область"),
+        ("Актау, мкр. Токабай, ул. Златоустская, д. 154, кв. 286", "Карагандинская область"),
     ],
 )
 def test_namesake_resolved_by_street_or_microdistrict(raw, province):
     assert parse_address(raw).values["province"] == province
 
 
-@NOT_YET
 def test_district_namesake_resolved_keeps_reference_name():
     assert fields("Есиль р-н, микрорайон Чубары, пр. Кима 72", "district") == ("Есиль",)
 
 
-@NOT_YET
 def test_region_from_district_comes_before_city_search():
     raw = "Ауэзовский р-н, Аксай 3 микрорайон 8дом 1 подьезд 14 кв"
     assert fields(raw, "province", "city", "street_name", "house") == (
@@ -88,18 +87,15 @@ def test_region_from_district_comes_before_city_search():
     )
 
 
-@NOT_YET
 def test_unresolvable_namesake_is_null_and_explained():
-    rec = extract_record(
-        {"id": 1, "raw_address": "Абайский район, ул. Корганбай Омешулы, д. 126"}, debug=True
-    )
+    # «Абая» есть во всех областях — это не улика; три «Абайских района» неразличимы.
+    rec = extract_record({"id": 1, "raw_address": "Абайский район, ул. Абая 5"}, debug=True)
     assert rec["province"] is None
     assert rec["district"] == "Абайский"  # район есть в строке, имя одинаковое у всех кандидатов
     cands = rec["_meta"]["ambiguity"]["province"]
     assert {"Шымкент", "Карагандинская область", "Абайская область"} <= set(cands)
 
 
-@NOT_YET
 def test_dominant_namesake_is_kept_but_flagged():
     rec = extract_record({"id": 1, "raw_address": "Аксу, ул. Абая 5"}, debug=True)
     assert rec["province"] == "Павлодарская область"  # город Аксу против сёл Аксу
@@ -118,7 +114,7 @@ def test_dominant_namesake_is_kept_but_flagged():
         todo("Шымкент г Жертумсык микрорайон 51дом 1 подъезд 243 кв", "Шымкент", "Жертумсык", "51"),
         todo("Казахстан,Темиртау ул.,35вдом,278,Шымкент", "Шымкент", "Темиртау", "35в"),
         todo("Каркаралинская, д.34а, кв 123, Шар", "Шар", "Каркаралинская", "34а"),
-        todo("Байконур р-н Шортанды ул. 192 108 пәтер 8подьезд 9 этаж", None, "Шортанды", "192"),
+        ("Байконур р-н Шортанды ул. 192 108 пәтер 8подьезд 9 этаж", None, "Шортанды", "192"),
     ],
 )
 def test_no_commas_rest(raw, city, street, house):
