@@ -147,7 +147,13 @@ def test_city_typo_without_marker(raw, city, province, street):
 
 @pytest.mark.parametrize(
     ("raw", "street"),
-    [("Сатпаева 5, кв 3", "Сатпаева"), ("Жансугурова 12, кв 4", "Жансугурова")],
+    [
+        ("Сатпаева 5, кв 3", "Сатпаева"),
+        ("Жансугурова 12, кв 4", "Жансугурова"),
+        # уже существующий нечёткий путь (сегмент из слов) перехватывал улицы:
+        todo("Сатпаева, 5, кв 3", "Сатпаева"),
+        todo("Жансугурова, 12", "Жансугурова"),
+    ],
 )
 def test_fuzzy_city_does_not_intercept_known_street(raw, street):
     assert fields(raw, "city", "street_name") == (None, street)
