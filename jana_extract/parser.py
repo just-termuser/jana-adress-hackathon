@@ -276,7 +276,16 @@ class Parser:
                 # «шымкент г абылай хана»: «г» относится к тому соседу, который НП.
                 b_found, _ = self.ref.find_settlement(before[-1].text, False)
                 a_found, _ = self.ref.find_settlement(self.tk.span(after[0], after[-1]), False)
-                if b_found and not a_found:
+                after_next = self._next(after[-1])
+                if b_found and (
+                    not a_found
+                    or (
+                        after_next is not None
+                        and after_next.marker in M.STREETISH
+                        and self._is_postfix_street_marker(after_next)
+                    )
+                ):
+                    # «Шымкент г Жертумсык микрорайон»: после «г» — название мкр.
                     after = []
             if short and not after and before and t.marker == M.CITY:
                 # «Алматы г»: постфиксное «г» — только для известного НП.
@@ -382,6 +391,8 @@ class Parser:
                 return  # весь сегмент — это обработает step_admin_unmarked
             if after.marker in M.ADMIN:
                 continue
+            if after.marker in M.STREETISH and self._is_postfix_street_marker(after):
+                continue  # «Темиртау ул.,», «Жертумсык микрорайон 51дом» — название улицы/мкр
             found, _ = self.ref.find_settlement(self.tk.span(part[0], part[-1]), False)
             if self.region is not None:
                 found = [s for s in found if s.region == self.region]
@@ -459,7 +470,12 @@ class Parser:
                 if (
                     not name
                     or t.hyphen_prev
-                    or (nxt is not None and self._is_plain_word(nxt) and nxt.seg == m.seg)
+                    or (
+                        nxt is not None
+                        and self._is_plain_word(nxt)
+                        and nxt.seg == m.seg
+                        and not self._is_trailing_city(nxt)
+                    )
                 ):
                     name.append(t)
                     # число без слов: «мкр 5», «12 микрорайон» — дальше не идём,
@@ -618,6 +634,57 @@ class Parser:
             segs.setdefault(t.seg, []).append(t)
         return list(segs.values())
 
+    def _is_postfix_street_marker(self, m: Token) -> bool:
+        """Маркер улицы/мкр стоит ПОСЛЕ названия: за ним нет ни слова, ни свободного
+        номера-названия («Темиртау ул.,», «Жертумсык микрорайон 51дом»). Префиксный
+        маркер («Алматы микрорайон Атамекен», «Уил ул. Досжан») — не такой."""
+        nxt = self._next(m)
+        return not (
+            nxt is not None and (self._is_plain_word(nxt) or (nxt.kind == NUM and self.free(nxt)))
+        )
+
+    def _town_match(self, toks: list[Token]) -> bool:
+        """Точное совпадение с городом/посёлком (или с любым НП известной области)."""
+        found, _ = self.ref.find_settlement(self.tk.span(toks[0], toks[-1]), False)
+        if self.region is not None:
+            return any(s.region == self.region for s in found)
+        return any(s.rank >= 3 for s in found)
+
+    def _is_trailing_city(self, t: Token) -> bool:
+        """Слова от t до конца строки — известный город: «проспект Ваганная 69 Алга»."""
+        rest = self.toks[t.i :]
+        if not rest or len(rest) > 3 or not all(self._is_plain_word(x) for x in rest):
+            return False
+        return self._town_match(rest)
+
+    def _later_city_segment(self, segs: list[list[Token]]) -> bool:
+        for seg in segs:
+            free = [t for t in seg if self.free(t)]
+            if free and all(self._is_plain_word(t) for t in free) and self._town_match(free):
+                return True
+        return False
+
+    def step_trailing_city(self) -> None:
+        """Город в конце строки без запятой, если города ещё нет."""
+        if any(c.kind in (M.CITY, M.SETTLEMENT) for c in self.comps):
+            return
+        tail: list[Token] = []
+        for t in reversed(self.toks):
+            if not self._is_plain_word(t) or (tail and t.seg != tail[0].seg) or len(tail) == 3:
+                break
+            tail.insert(0, t)
+        if not tail:
+            return
+        prev = self.toks[tail[0].i - 1] if tail[0].i > 0 else None
+        if prev is None or prev.seg != tail[0].seg:
+            return  # целый сегмент — забота step_admin_unmarked
+        for k in range(len(tail)):
+            part = tail[k:]
+            if self._town_match(part):
+                self._use(part, M.CITY)
+                self.comps.append(Comp(M.CITY, part, marked=False, conf=0.75))
+                return
+
     def step_admin_unmarked(self) -> None:
         segs = self._segments()
         have_city = any(c.kind in (M.CITY, M.SETTLEMENT) and not c.alt for c in self.comps)
@@ -636,6 +703,11 @@ class Parser:
                 and next((t for t in next_seg if self.free(t)), None) is not None
                 and next(t for t in next_seg if self.free(t)).kind == NUM
             )
+            # «Каркаралинская, д.34а, …, Шар»: сегмент прямо перед домом по маркеру —
+            # улица, если город найдётся в другом сегменте.
+            following = segs[si + 1][0] if si + 1 < len(segs) else None
+            if not next_starts_num and self._is_house_anchor(following):
+                next_starts_num = have_city or self._later_city_segment(segs[si + 1 :])
             if only_words and words:
                 text = self.tk.span(words[0], words[-1])
                 if self._try_admin(
@@ -643,7 +715,7 @@ class Parser:
                     text,
                     have_city,
                     allow_fuzzy=not first_content_seen,
-                    street_like=next_starts_num and have_city,
+                    street_like=next_starts_num and (have_city or self._is_house_anchor(following)),
                 ):
                     have_city = have_city or any(
                         c.kind in (M.CITY, M.SETTLEMENT) for c in self.comps
@@ -1082,6 +1154,7 @@ class Parser:
         self.step_landmarks()
         self.step_street_markers()
         self.step_admin_unmarked()
+        self.step_trailing_city()
         if self.region is None:
             self._prelim_region()
         self.step_street_unmarked()
