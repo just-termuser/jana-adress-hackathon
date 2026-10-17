@@ -410,7 +410,7 @@
 "expect": {
 "province": "Акмолинская область",
 "city": "Степняк",
-"district": "Биржан сал",
+"district": null,
 "living_area": "Шынгыстай",
 "street_type": "улица",
 "street_name": "Алимжан Баймуканов",
@@ -704,7 +704,7 @@
 "expect": {
 "province": "Костанайская область",
 "city": "Сарыколь",
-"district": "Сарыкольский",
+"district": null,
 "living_area": null,
 "street_type": "переулок",
 "street_name": "Мелехова",
@@ -793,7 +793,7 @@
 "expect": {
 "province": "Актюбинская область",
 "city": "Темир",
-"district": "Темирский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Ават",
@@ -2032,7 +2032,7 @@
 "expect": {
 "province": "Карагандинская область",
 "city": "Ботакара",
-"district": "Бухар-Жырауский",
+"district": null,
 "living_area": null,
 "street_type": null,
 "street_name": "Фаворского",
@@ -2185,7 +2185,7 @@
 "expect": {
 "province": "Актюбинская область",
 "city": "Шалкар",
-"district": "Шалкарский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Куншуак",
@@ -2251,7 +2251,7 @@
 "expect": {
 "province": "Жетысуская область",
 "city": "Корабулак",
-"district": "Ескельдинский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Талдыарал",
@@ -2363,7 +2363,7 @@
 "expect": {
 "province": "Актюбинская область",
 "city": "Шұбарши",
-"district": "Темирский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Томарлы",
@@ -2431,7 +2431,7 @@
 "expect": {
 "province": "Абайская область",
 "city": "Жарма",
-"district": "Жарминский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Бадам 1",
@@ -2476,7 +2476,7 @@
 "expect": {
 "province": "Жамбылская область",
 "city": "Каратау",
-"district": "Таласский",
+"district": null,
 "living_area": null,
 "street_type": null,
 "street_name": "Жылысбаев",
@@ -2767,7 +2767,7 @@
 "expect": {
 "province": "Акмолинская область",
 "city": "Есиль",
-"district": "Есильский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Жыдели",
@@ -2884,7 +2884,7 @@
 "expect": {
 "province": "Кызылординская область",
 "city": "Теренозек",
-"district": "Сырдарьинский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Шошка",
@@ -2908,7 +2908,7 @@
 "expect": {
 "province": "Жамбылская область",
 "city": "Шу",
-"district": "Шуский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Бактыарал",
@@ -3022,7 +3022,7 @@
 "expect": {
 "province": "Абайская область",
 "city": "Аксуат",
-"district": "Аксуатский",
+"district": null,
 "living_area": "Аксай 5",
 "street_type": "улица",
 "street_name": "Гражданская",
@@ -3042,7 +3042,7 @@
 "expect": {
 "province": "Улутауская область",
 "city": "Кызылжар",
-"district": "Жанааркинский",
+"district": null,
 "living_area": "Арыкбай",
 "street_type": "улица",
 "street_name": "Балтабая Сулейменова",
@@ -3132,7 +3132,7 @@
 "expect": {
 "province": "Костанайская область",
 "city": "Тобыл",
-"district": "Костанайский",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "Тубсанаторий",
@@ -3813,7 +3813,7 @@
 "expect": {
 "province": "Акмолинская область",
 "city": "Аршалы",
-"district": "Аршалынский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Котовского",
@@ -3835,7 +3835,7 @@
 "expect": {
 "province": "Карагандинская область",
 "city": "Топар",
-"district": "Абайский",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "Алихан Бокейхан",
@@ -4058,7 +4058,7 @@
 "expect": {
 "province": "Северо-Казахстанская область",
 "city": "Сергеевка",
-"district": "Шал акына",
+"district": null,
 "living_area": null,
 "street_type": null,
 "street_name": "Сутюшева",
@@ -4101,7 +4101,7 @@
 "expect": {
 "province": "Кызылординская область",
 "city": "Шиели",
-"district": "Шиелийский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Жылы",
@@ -4405,7 +4405,7 @@
 "expect": {
 "province": "Улутауская область",
 "city": "Кызылжар",
-"district": "Жанааркинский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Доброволского",
@@ -4629,7 +4629,7 @@
 "expect": {
 "province": "Алматинская область",
 "city": "Ават",
-"district": "Енбекшиказахский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "25",
@@ -4808,7 +4808,7 @@
 "expect": {
 "province": "Алматинская область",
 "city": "Ават",
-"district": "Енбекшиказахский",
+"district": null,
 "living_area": null,
 "street_type": null,
 "street_name": "Бейсембетулы",
@@ -4993,7 +4993,7 @@
 "expect": {
 "province": "Жетысуская область",
 "city": "Уштобе",
-"district": "Каратальский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Жалпаколен",
@@ -5127,7 +5127,7 @@
 "expect": {
 "province": "Костанайская область",
 "city": "Сарыколь",
-"district": "Сарыкольский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Жанатекес",
@@ -5287,7 +5287,7 @@
 "expect": {
 "province": "Акмолинская область",
 "city": "шортанды",
-"district": "Шортандинский",
+"district": null,
 "living_area": null,
 "street_type": null,
 "street_name": "коянды",
@@ -5488,7 +5488,7 @@
 "expect": {
 "province": "Абайская область",
 "city": "Ауэзов",
-"district": "Жарминский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "10",
@@ -6680,7 +6680,7 @@
 "expect": {
 "province": "Акмолинская область",
 "city": "Аршалы",
-"district": "Аршалынский",
+"district": null,
 "living_area": null,
 "street_type": null,
 "street_name": "Сазонов",
@@ -7070,7 +7070,7 @@
 "expect": {
 "province": "Акмолинская область",
 "city": "Акколь",
-"district": "Аккольский",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "Шакена Айманова",
@@ -7165,7 +7165,7 @@
 "expect": {
 "province": "Кызылординская область",
 "city": "Айтеке би",
-"district": "Казалинский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "12",
@@ -7347,7 +7347,7 @@
 "expect": {
 "province": "Северо-Казахстанская область",
 "city": "Сергеевка",
-"district": "Шал акына",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Перминов",
@@ -7368,7 +7368,7 @@
 "expect": {
 "province": "Акмолинская область",
 "city": "Степняк",
-"district": "Биржан сал",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Шилису",
@@ -7703,7 +7703,7 @@
 "expect": {
 "province": "Акмолинская область",
 "city": "Шортанды",
-"district": "Шортандинский",
+"district": null,
 "living_area": null,
 "street_type": null,
 "street_name": "Акана Сери",
@@ -7955,7 +7955,7 @@
 "expect": {
 "province": "Жамбылская область",
 "city": "Шу",
-"district": "Шуский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Буралкиева",
@@ -8108,7 +8108,7 @@
 "expect": {
 "province": "Туркестанская область",
 "city": "Казыгурт",
-"district": "Казыгуртский",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "Нарбаева",
@@ -9269,7 +9269,7 @@
 "expect": {
 "province": "Абайская область",
 "city": "Аксуат",
-"district": "Аксуатский",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "Лесотарная",
@@ -9799,7 +9799,7 @@
 "expect": {
 "province": "Туркестанская область",
 "city": "Шардара",
-"district": "Шардаринский",
+"district": null,
 "living_area": null,
 "street_type": null,
 "street_name": "Естай",
@@ -10048,7 +10048,7 @@
 "expect": {
 "province": "Жетысуская область",
 "city": "Карабулак",
-"district": "Ескельдинский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Узынкол",
@@ -10071,7 +10071,7 @@
 "expect": {
 "province": "Кызылординская область",
 "city": "жосалы",
-"district": "Кармакшинский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "22",
@@ -10269,7 +10269,7 @@
 "expect": {
 "province": "Туркестанская область",
 "city": "Казыгурт",
-"district": "Казыгуртский",
+"district": null,
 "living_area": "Кажымукан",
 "street_type": "проспект",
 "street_name": "Ж Кенжебай",
@@ -10340,7 +10340,7 @@
 "expect": {
 "province": "Жетысуская область",
 "city": "Булакты",
-"district": "Алакольский",
+"district": null,
 "living_area": null,
 "street_type": null,
 "street_name": "Талдыкорганский",
@@ -10722,7 +10722,7 @@
 "expect": {
 "province": "Алматинская область",
 "city": "Ават",
-"district": "Енбекшиказахский",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "Тамды",
@@ -11063,7 +11063,7 @@
 "expect": {
 "province": "Актюбинская область",
 "city": "Темир",
-"district": "Темирский",
+"district": null,
 "living_area": "Подпуск",
 "street_type": "улица",
 "street_name": "Дины Нурпеисовой",
@@ -11621,7 +11621,7 @@
 "expect": {
 "province": "Акмолинская область",
 "city": "Шартанды",
-"district": "Шортандинский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Фадеева",
@@ -12111,7 +12111,7 @@
 "expect": {
 "province": "Западно-Казахстанская область",
 "city": "Аксай",
-"district": "Бурлинский",
+"district": null,
 "living_area": null,
 "street_type": null,
 "street_name": "Исатай Махамбета",
@@ -12868,7 +12868,7 @@
 "expect": {
 "province": "Кызылординская область",
 "city": "Шиели",
-"district": "Шиелийский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Алтын Орда",
@@ -13163,7 +13163,7 @@
 "expect": {
 "province": "Абайская область",
 "city": "Жарма",
-"district": "Жарминский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Геодезическая",
@@ -13630,7 +13630,7 @@
 "expect": {
 "province": "Алматинская область",
 "city": "Жибек Жолы",
-"district": "Карасайский",
+"district": null,
 "living_area": null,
 "street_type": null,
 "street_name": "Торайгырова",
@@ -13788,7 +13788,7 @@
 "expect": {
 "province": "Акмолинская область",
 "city": "Шортанды",
-"district": "Шортандинский",
+"district": null,
 "living_area": "Шомиш",
 "street_type": "улица",
 "street_name": "Кулаш Байсейитова",
@@ -14311,7 +14311,7 @@
 "expect": {
 "province": "Туркестанская область",
 "city": "Казыгурт",
-"district": "Казыгуртский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Боктысай",
@@ -14443,7 +14443,7 @@
 "expect": {
 "province": "Карагандинская область",
 "city": "Топор",
-"district": "Абайский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Железнодоражный",
@@ -14751,7 +14751,7 @@
 "expect": {
 "province": "Абайская область",
 "city": "Жанаауыл",
-"district": "Бородулихинский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "19",
@@ -14775,7 +14775,7 @@
 "expect": {
 "province": "Восточно-Казахстанская область",
 "city": "Алтай",
-"district": "Алтайский",
+"district": null,
 "living_area": "Сарыжал",
 "street_type": "улица",
 "street_name": "Урицкого",
@@ -14910,7 +14910,7 @@
 "expect": {
 "province": "Карагандинская область",
 "city": "Топар",
-"district": "Абайский",
+"district": null,
 "living_area": null,
 "street_type": null,
 "street_name": "Караганда Жезказган",
@@ -14933,7 +14933,7 @@
 "expect": {
 "province": "Акмолинская область",
 "city": "Аршалы",
-"district": "Аршалынский",
+"district": null,
 "living_area": null,
 "street_type": null,
 "street_name": "Болошак",
@@ -15090,7 +15090,7 @@
 "expect": {
 "province": "Жетысуская область",
 "city": "Булокты",
-"district": "Алакольский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Нукенова",
@@ -16837,7 +16837,7 @@
 "expect": {
 "province": "Жамбылская область",
 "city": "Мерке",
-"district": "Меркенский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Шошакшагыл",
@@ -16905,7 +16905,7 @@
 "expect": {
 "province": "Актюбинская область",
 "city": "Алга",
-"district": "Алгинский",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "Машанова",
@@ -17111,7 +17111,7 @@
 "expect": {
 "province": "Акмолинская область",
 "city": "Койтас",
-"district": "Ерейментауский",
+"district": null,
 "living_area": "Шиликудык",
 "street_type": "улица",
 "street_name": "Елеваторная",
@@ -17133,7 +17133,7 @@
 "expect": {
 "province": "Карагандинская область",
 "city": "молодёжный",
-"district": "Осакаровский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "13",
@@ -17291,7 +17291,7 @@
 "expect": {
 "province": "Акмолинская область",
 "city": "Акколь",
-"district": "Аккольский",
+"district": null,
 "living_area": null,
 "street_type": null,
 "street_name": "Гарифулы Амансугурова",
@@ -17670,7 +17670,7 @@
 "expect": {
 "province": "Восточно-Казахстанская область",
 "city": "Алтой",
-"district": "Алтайский",
+"district": null,
 "living_area": "Сарыой",
 "street_type": "проспект",
 "street_name": "Толебай",
@@ -17692,7 +17692,7 @@
 "expect": {
 "province": "Восточно-Казахстанская область",
 "city": "Алтой",
-"district": "Алтайский",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "Курчум Теректы",
@@ -17923,7 +17923,7 @@
 "expect": {
 "province": "Кызылординская область",
 "city": "Жосалы",
-"district": "Кармакшинский",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "Нурекешов",
@@ -18014,7 +18014,7 @@
 "expect": {
 "province": "Жетысуская область",
 "city": "Карабулак",
-"district": "Ескельдинский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Ботабай",
@@ -18211,7 +18211,7 @@
 "expect": {
 "province": "Жамбылская область",
 "city": "Шу",
-"district": "Шуский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "13",
@@ -18341,7 +18341,7 @@
 "expect": {
 "province": "Кызылординская область",
 "city": "шиели",
-"district": "Шиелийский",
+"district": null,
 "living_area": null,
 "street_type": null,
 "street_name": "елеусизов балмухан лица",
@@ -18455,7 +18455,7 @@
 "expect": {
 "province": "Акмолинская область",
 "city": "Бурабай",
-"district": "Бурабайский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Горнолесная",
@@ -18950,7 +18950,7 @@
 "expect": {
 "province": "Жамбылская область",
 "city": "Шу",
-"district": "Шуский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Темрей",
@@ -19082,7 +19082,7 @@
 "expect": {
 "province": "Актюбинская область",
 "city": "Шалкар",
-"district": "Шалкарский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Даси",
@@ -19528,7 +19528,7 @@
 "expect": {
 "province": "Кызылординская область",
 "city": "Шиели",
-"district": "Шиелийский",
+"district": null,
 "living_area": null,
 "street_type": "квартал",
 "street_name": "25",
@@ -20142,7 +20142,7 @@
 "expect": {
 "province": "Абайская область",
 "city": "Жарма",
-"district": "Жарминский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Аксай 5",
@@ -20303,7 +20303,7 @@
 "expect": {
 "province": "Актюбинская область",
 "city": "Алга",
-"district": "Алгинский",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "Ваганная",
@@ -20327,7 +20327,7 @@
 "expect": {
 "province": "Кызылординская область",
 "city": "Теренозек",
-"district": "Сырдарьинский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Сайрам",
@@ -20803,7 +20803,7 @@
 "expect": {
 "province": "Абайская область",
 "city": "Жарма",
-"district": "Жарминский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Бакинская",
@@ -21908,7 +21908,7 @@
 "expect": {
 "province": "Жетысуская область",
 "city": "Кабанбай",
-"district": "Алакольский",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "Байгутова",
@@ -22039,7 +22039,7 @@
 "expect": {
 "province": "Костанайская область",
 "city": "Сарыкөл",
-"district": "Сарыкольский",
+"district": null,
 "living_area": "Сенокосное",
 "street_type": "улица",
 "street_name": "Молодежный",
@@ -22349,7 +22349,7 @@
 "expect": {
 "province": "Алматинская область",
 "city": "Узынагаш",
-"district": "Жамбылский",
+"district": null,
 "living_area": null,
 "street_type": null,
 "street_name": "Айтумар",
@@ -23133,7 +23133,7 @@
 "expect": {
 "province": "Жетысуская область",
 "city": "Уштобе",
-"district": "Каратальский",
+"district": null,
 "living_area": null,
 "street_type": null,
 "street_name": "Беляева",
@@ -23225,7 +23225,7 @@
 "expect": {
 "province": "Актюбинская область",
 "city": "Шалкар",
-"district": "Шалкарский",
+"district": null,
 "living_area": null,
 "street_type": null,
 "street_name": "Арынова",
@@ -23562,7 +23562,7 @@
 "expect": {
 "province": "Актюбинская область",
 "city": "Алга",
-"district": "Алгинский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Байкадам",
@@ -23993,7 +23993,7 @@
 "expect": {
 "province": "Акмолинская область",
 "city": "Акколь",
-"district": "Аккольский",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "Кокшетау Кишкенекол Бидаикское",
@@ -24270,7 +24270,7 @@
 "expect": {
 "province": "Жамбылская область",
 "city": "Каратоу",
-"district": "Таласский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Атырау 3",
@@ -24408,7 +24408,7 @@
 "expect": {
 "province": "Восточно-Казахстанская область",
 "city": "Алтай",
-"district": "Алтайский",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "Почтовая",
@@ -24475,7 +24475,7 @@
 "expect": {
 "province": "Жетысуская область",
 "city": "карабулак",
-"district": "Ескельдинский",
+"district": null,
 "living_area": null,
 "street_type": "квартал",
 "street_name": "27",
@@ -24885,7 +24885,7 @@
 "expect": {
 "province": "Акмолинская область",
 "city": "Акколь",
-"district": "Аккольский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Бесапан",
@@ -25039,7 +25039,7 @@
 "expect": {
 "province": "Карагандинская область",
 "city": "Молодёжный",
-"district": "Осакаровский",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "Кондитерская",
@@ -25216,7 +25216,7 @@
 "expect": {
 "province": "Костанайская область",
 "city": "Тобыл",
-"district": "Костанайский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Корган",
@@ -25391,7 +25391,7 @@
 "expect": {
 "province": "Акмолинская область",
 "city": "Акколь",
-"district": "Аккольский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Саркырама",
@@ -25559,7 +25559,7 @@
 "expect": {
 "province": "Карагандинская область",
 "city": "Карабас",
-"district": "Абайский",
+"district": null,
 "living_area": null,
 "street_type": null,
 "street_name": "Ортау",
@@ -25788,7 +25788,7 @@
 "expect": {
 "province": "Кызылординская область",
 "city": "Жосалы",
-"district": "Кармакшинский",
+"district": null,
 "living_area": null,
 "street_type": null,
 "street_name": "Улбиби Балымбетова",
@@ -25984,7 +25984,7 @@
 "expect": {
 "province": "Карагандинская область",
 "city": "Абай",
-"district": "Абайский",
+"district": null,
 "living_area": "Туркебай",
 "street_type": "проспект",
 "street_name": "Пионерский",
@@ -26428,7 +26428,7 @@
 "expect": {
 "province": "Алматинская область",
 "city": "Жибек Жолы",
-"district": "Карасайский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Алтын Орда",
@@ -26948,7 +26948,7 @@
 "expect": {
 "province": "Жамбылская область",
 "city": "Каратау",
-"district": "Таласский",
+"district": null,
 "living_area": null,
 "street_type": "квартал",
 "street_name": "33",
@@ -27177,7 +27177,7 @@
 "expect": {
 "province": "Акмолинская область",
 "city": "Бурабай",
-"district": "Бурабайский",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "Ишим",
@@ -27243,7 +27243,7 @@
 "expect": {
 "province": "Акмолинская область",
 "city": "Бюрабай",
-"district": "Бурабайский",
+"district": null,
 "living_area": null,
 "street_type": null,
 "street_name": "Едиге",
@@ -27352,7 +27352,7 @@
 "expect": {
 "province": "Жамбылская область",
 "city": "Шу",
-"district": "Шуский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "26",
@@ -27489,7 +27489,7 @@
 "expect": {
 "province": "Жетысуская область",
 "city": "Булакты",
-"district": "Алакольский",
+"district": null,
 "living_area": "Кенарал",
 "street_type": "улица",
 "street_name": "Жолашар",
@@ -27823,7 +27823,7 @@
 "expect": {
 "province": "Жамбылская область",
 "city": "Шу",
-"district": "Шуский",
+"district": null,
 "living_area": null,
 "street_type": null,
 "street_name": "Канат Обикулов",
@@ -28112,7 +28112,7 @@
 "expect": {
 "province": "Восточно-Казахстанская область",
 "city": "Алтай",
-"district": "Алтайский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Аксай 3а",
@@ -28222,7 +28222,7 @@
 "expect": {
 "province": "Улутауская область",
 "city": "Кызылжар",
-"district": "Жанааркинский",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "Жакыпбекова",
@@ -28358,7 +28358,7 @@
 "expect": {
 "province": "Алматинская область",
 "city": "Узынагаш",
-"district": "Жамбылский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Ертаев Карнак",
@@ -28378,7 +28378,7 @@
 "expect": {
 "province": "Кызылординская область",
 "city": "Жосалы",
-"district": "Кармакшинский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Колкамыс",
@@ -29395,7 +29395,7 @@
 "expect": {
 "province": "Жамбылская область",
 "city": "Шу",
-"district": "Шуский",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "Сайгулик",
@@ -29693,7 +29693,7 @@
 "expect": {
 "province": "Восточно-Казахстанская область",
 "city": "Алтай",
-"district": "Алтайский",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "Аймаутова",
@@ -30298,7 +30298,7 @@
 "expect": {
 "province": "Улутауская область",
 "city": "кызылжар",
-"district": "Жанааркинский",
+"district": null,
 "living_area": null,
 "street_type": "переулок",
 "street_name": "песчаная",
@@ -30474,7 +30474,7 @@
 "expect": {
 "province": "Кызылординская область",
 "city": "Жосалы",
-"district": "Кармакшинский",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "Космодемянской",
@@ -30541,7 +30541,7 @@
 "expect": {
 "province": "Кызылординская область",
 "city": "Жалагаш",
-"district": "Жалагашский",
+"district": null,
 "living_area": "Кемел",
 "street_type": "проспект",
 "street_name": "Сатбаев",
@@ -30628,7 +30628,7 @@
 "expect": {
 "province": "Жамбылская область",
 "city": "Каратау",
-"district": "Таласский",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "Кабанбай Батыр",
@@ -30854,7 +30854,7 @@
 "expect": {
 "province": "Туркестанская область",
 "city": "Шардара",
-"district": "Шардаринский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Баубек",
@@ -30876,7 +30876,7 @@
 "expect": {
 "province": "Алматинская область",
 "city": "Ават",
-"district": "Енбекшиказахский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "26",
@@ -31130,7 +31130,7 @@
 "expect": {
 "province": "Жамбылская область",
 "city": "Мерке",
-"district": "Меркенский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Лермонтов",
@@ -31557,7 +31557,7 @@
 "expect": {
 "province": "Алматинская область",
 "city": "жибек жолы",
-"district": "Карасайский",
+"district": null,
 "living_area": null,
 "street_type": null,
 "street_name": "б басибекова",
@@ -31580,7 +31580,7 @@
 "expect": {
 "province": "Жетысуская область",
 "city": "Булакты",
-"district": "Алакольский",
+"district": null,
 "living_area": "Майкан",
 "street_type": "улица",
 "street_name": "Жетысу",
@@ -31602,7 +31602,7 @@
 "expect": {
 "province": "Акмолинская область",
 "city": "Аршалы",
-"district": "Аршалынский",
+"district": null,
 "living_area": "Чернорецк",
 "street_type": "улица",
 "street_name": "Булкышева",
@@ -32070,7 +32070,7 @@
 "expect": {
 "province": "Атырауская область",
 "city": "Махамбет",
-"district": "Махамбетский",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "Шафих Избасов",
@@ -32185,7 +32185,7 @@
 "expect": {
 "province": "Карагандинская область",
 "city": "Ботакора",
-"district": "Бухар-Жырауский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Куйген",
@@ -32388,7 +32388,7 @@
 "expect": {
 "province": "Улутауская область",
 "city": "Актас",
-"district": "Улытауский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Коктобе",
@@ -32675,7 +32675,7 @@
 "expect": {
 "province": "Актюбинская область",
 "city": "Шалкар",
-"district": "Шалкарский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "29",
@@ -32948,7 +32948,7 @@
 "expect": {
 "province": "Северо-Казахстанская область",
 "city": "сергеевка",
-"district": "Шал акына",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "умышева",
@@ -33317,7 +33317,7 @@
 "expect": {
 "province": "Актюбинская область",
 "city": "алға",
-"district": "Алгинский",
+"district": null,
 "living_area": null,
 "street_type": null,
 "street_name": "тажыбаева",
@@ -33364,7 +33364,7 @@
 "expect": {
 "province": "Актюбинская область",
 "city": "Алга",
-"district": "Алгинский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Борсык",
@@ -33649,7 +33649,7 @@
 "expect": {
 "province": "Актюбинская область",
 "city": "Шубарши",
-"district": "Темирский",
+"district": null,
 "living_area": null,
 "street_type": null,
 "street_name": "Нефтеразведчиков",
@@ -33824,7 +33824,7 @@
 "expect": {
 "province": "Акмолинская область",
 "city": "Шортанды",
-"district": "Шортандинский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Костерек",
@@ -33846,7 +33846,7 @@
 "expect": {
 "province": "Туркестанская область",
 "city": "Казыгурт",
-"district": "Казыгуртский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "31",
@@ -34006,7 +34006,7 @@
 "expect": {
 "province": "Акмолинская область",
 "city": "Акколь",
-"district": "Аккольский",
+"district": null,
 "living_area": null,
 "street_type": null,
 "street_name": "Агыбай Батыр",
@@ -34098,7 +34098,7 @@
 "expect": {
 "province": "Жетысуская область",
 "city": "Карабулак",
-"district": "Ескельдинский",
+"district": null,
 "living_area": "Кабакши 2",
 "street_type": "проспект",
 "street_name": "Папанина",
@@ -34202,7 +34202,7 @@
 "expect": {
 "province": "Костанайская область",
 "city": "Сарыколь",
-"district": "Сарыкольский",
+"district": null,
 "living_area": null,
 "street_type": null,
 "street_name": "Огородная",
@@ -34315,7 +34315,7 @@
 "expect": {
 "province": "Карагандинская область",
 "city": "Карабас",
-"district": "Абайский",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "Свет Оразаев",
@@ -34404,7 +34404,7 @@
 "expect": {
 "province": "Карагандинская область",
 "city": "Абай",
-"district": "Абайский",
+"district": null,
 "living_area": null,
 "street_type": null,
 "street_name": "Почтовая",
@@ -34801,7 +34801,7 @@
 "expect": {
 "province": "Улутауская область",
 "city": "Кызылжар",
-"district": "Жанааркинский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Дружбы",
@@ -34940,7 +34940,7 @@
 "expect": {
 "province": "Жамбылская область",
 "city": "Каратау",
-"district": "Таласский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "20",
@@ -35318,7 +35318,7 @@
 "expect": {
 "province": "Акмолинская область",
 "city": "Акколь",
-"district": "Аккольский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Арай",
@@ -35473,7 +35473,7 @@
 "expect": {
 "province": "Алматинская область",
 "city": "Ават",
-"district": "Енбекшиказахский",
+"district": null,
 "living_area": null,
 "street_type": "переулок",
 "street_name": "Чайковского",
@@ -36062,7 +36062,7 @@
 "expect": {
 "province": "Абайская область",
 "city": "Аксуат",
-"district": "Аксуатский",
+"district": null,
 "living_area": null,
 "street_type": "переулок",
 "street_name": "Найманбаева",
@@ -36700,7 +36700,7 @@
 "expect": {
 "province": "Жетысуская область",
 "city": "Карабулак",
-"district": "Ескельдинский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Шугыла",
@@ -36952,7 +36952,7 @@
 "expect": {
 "province": "Костанайская область",
 "city": "Сарыкөл",
-"district": "Сарыкольский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Тенистый",
@@ -37132,7 +37132,7 @@
 "expect": {
 "province": "Акмолинская область",
 "city": "Шортанды",
-"district": "Шортандинский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Бектурова",
@@ -37152,7 +37152,7 @@
 "expect": {
 "province": "Акмолинская область",
 "city": "Степняк",
-"district": "Биржан сал",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Терешковой",
@@ -37358,7 +37358,7 @@
 "expect": {
 "province": "Туркестанская область",
 "city": "Шардара",
-"district": "Шардаринский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Бакытбаев",
@@ -37558,7 +37558,7 @@
 "expect": {
 "province": "Кызылординская область",
 "city": "Казалы",
-"district": "Казалинский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Пушкина",
@@ -37890,7 +37890,7 @@
 "expect": {
 "province": "Карагандинская область",
 "city": "Ботакара",
-"district": "Бухар-Жырауский",
+"district": null,
 "living_area": "Кожакент",
 "street_type": "улица",
 "street_name": "Осакаровская",
@@ -38787,7 +38787,7 @@
 "expect": {
 "province": "Абайская область",
 "city": "Аксуат",
-"district": "Аксуатский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Жана Курылыс",
@@ -38875,7 +38875,7 @@
 "expect": {
 "province": "Костанайская область",
 "city": "Тобыл",
-"district": "Костанайский",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "Лихачева",
@@ -39088,7 +39088,7 @@
 "expect": {
 "province": "Костанайская область",
 "city": "Тобыл",
-"district": "Костанайский",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "Зеленый Клин",
@@ -39312,7 +39312,7 @@
 "expect": {
 "province": "Акмолинская область",
 "city": "Аршолы",
-"district": "Аршалынский",
+"district": null,
 "living_area": "Тоганас",
 "street_type": "улица",
 "street_name": "Верхняя",
@@ -39381,7 +39381,7 @@
 "expect": {
 "province": "Актюбинская область",
 "city": "Темир",
-"district": "Темирский",
+"district": null,
 "living_area": "Карасай",
 "street_type": "улица",
 "street_name": "Канахын",
@@ -39521,7 +39521,7 @@
 "expect": {
 "province": "Жетысуская область",
 "city": "Қарабұлақ",
-"district": "Ескельдинский",
+"district": null,
 "living_area": null,
 "street_type": "квартал",
 "street_name": "16",
@@ -39790,7 +39790,7 @@
 "expect": {
 "province": "Кызылординская область",
 "city": "Жалагаш",
-"district": "Жалагашский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Калпе",
@@ -40022,7 +40022,7 @@
 "expect": {
 "province": "Жамбылская область",
 "city": "Шу",
-"district": "Шуский",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "Сакен Сейфулин",
@@ -40044,7 +40044,7 @@
 "expect": {
 "province": "Акмолинская область",
 "city": "Шортанды",
-"district": "Шортандинский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Торговый",
@@ -40174,7 +40174,7 @@
 "expect": {
 "province": "Жамбылская область",
 "city": "Шу",
-"district": "Шуский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Лысенко",
@@ -40370,7 +40370,7 @@
 "expect": {
 "province": "Актюбинская область",
 "city": "Шубарши",
-"district": "Темирский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Малкара",
@@ -41382,7 +41382,7 @@
 "expect": {
 "province": "Жетысуская область",
 "city": "Карабулак",
-"district": "Ескельдинский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Акименко",
@@ -41533,7 +41533,7 @@
 "expect": {
 "province": "Абайская область",
 "city": "Ауэзов",
-"district": "Жарминский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Сатбаев",
@@ -41742,7 +41742,7 @@
 "expect": {
 "province": "Кызылординская область",
 "city": "Теренозек",
-"district": "Сырдарьинский",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "Шазат Мусахметов",
@@ -42013,7 +42013,7 @@
 "expect": {
 "province": "Западно-Казахстанская область",
 "city": "Акзай",
-"district": "Бурлинский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Металлург",
@@ -42036,7 +42036,7 @@
 "expect": {
 "province": "Костанайская область",
 "city": "Тобыл",
-"district": "Костанайский",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "Ж Султанбекова",
@@ -42257,7 +42257,7 @@
 "expect": {
 "province": "Кызылординская область",
 "city": "Жалагаш",
-"district": "Жалагашский",
+"district": null,
 "living_area": "Ардагер",
 "street_type": "улица",
 "street_name": "Бакберген Мустафаев",
@@ -42368,7 +42368,7 @@
 "expect": {
 "province": "Алматинская область",
 "city": "Ават",
-"district": "Енбекшиказахский",
+"district": null,
 "living_area": null,
 "street_type": "проспект",
 "street_name": "Абдилды",
@@ -42437,7 +42437,7 @@
 "expect": {
 "province": "Акмолинская область",
 "city": "Бурабай",
-"district": "Бурабайский",
+"district": null,
 "living_area": null,
 "street_type": "микрорайон",
 "street_name": "Рес",
@@ -43442,7 +43442,7 @@
 "expect": {
 "province": "Кызылординская область",
 "city": "Казалы",
-"district": "Казалинский",
+"district": null,
 "living_area": null,
 "street_type": "переулок",
 "street_name": "Сарке Батыр",
@@ -44077,7 +44077,7 @@
 "expect": {
 "province": "Жамбылская область",
 "city": "Шу",
-"district": "Шуский",
+"district": null,
 "living_area": "Акшокы",
 "street_type": "улица",
 "street_name": "Шакарым",
@@ -44462,7 +44462,7 @@
 "expect": {
 "province": "Алматинская область",
 "city": "Жібек жолы",
-"district": "Карасайский",
+"district": null,
 "living_area": null,
 "street_type": "улица",
 "street_name": "Басара Жанадилова",
@@ -44508,7 +44508,7 @@
 "expect": {
 "province": "Кызылординская область",
 "city": "Арал",
-"district": "Аральский",
+"district": null,
 "living_area": "Састобе",
 "street_type": "улица",
 "street_name": "Абубакирова Жумадилда",
@@ -44709,7 +44709,7 @@
 "expect": {
 "province": "Абайская область",
 "city": "Аксуат",
-"district": "Аксуатский",
+"district": null,
 "living_area": "Сарепта",
 "street_type": "проспект",
 "street_name": "Семей Саржал",
@@ -44913,7 +44913,7 @@
 "expect": {
 "province": "Восточно-Казахстанская область",
 "city": "Алтай",
-"district": "Алтайский",
+"district": null,
 "living_area": null,
 "street_type": "переулок",
 "street_name": "Низкое Местечко",

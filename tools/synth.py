@@ -109,14 +109,16 @@ class Ref:
     def unambiguous_district(self, settlement: dict, region_ctx: int | None) -> str | None:
         """Район НП, если «НП → район» однозначно по справочнику и контексту строки.
 
-        Неоднозначно: одноимённые НП того же ранга, не различимые по области из
+        Неоднозначно: больше одного одноимённого НП, не различимых по области из
         строки; НП — город областного значения (вне районов); «район» совпадает
         с названием самого города (горадминистрация, как «Конаев»)."""
         if settlement.get("district") is None:
             return None
         found, _ = self.jref.find_settlement(settlement["name"], fuzzy=False)
-        best = self.jref.best_settlement(found, region_ctx)
-        if best is None or best.idx != settlement["_idx"]:
+        pool = [s for s in found if region_ctx is None or s.region == region_ctx]
+        # Однозначно = ровно один НП с таким названием после учёта контекста строки.
+        # Перевес по рангу («самая крупная Алексеевка») однозначностью не считается.
+        if len(pool) != 1 or pool[0].idx != settlement["_idx"]:
             return None
         name = self.districts[settlement["district"]]["name"]
         if fold(name) == fold(settlement["name"]):
