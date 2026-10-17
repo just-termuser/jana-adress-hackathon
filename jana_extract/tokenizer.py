@@ -16,7 +16,7 @@ import re
 import unicodedata
 from dataclasses import dataclass, field
 
-from .markers import MULTI, NUMBER_MARKERS, POSTFIX_LANG, SINGLE
+from .markers import LANDMARK, LANDMARK_NOUN, MULTI, NUMBER_MARKERS, POSTFIX_LANG, SINGLE
 from .text import INVISIBLE, fold, has_kazakh_letters
 
 WORD = "word"
@@ -195,6 +195,8 @@ def _mark_markers(tokens: list[Token]) -> None:
         hit = SINGLE.get(t.f)
         if hit:
             t.marker, t.canon = hit
+        elif LANDMARK_NOUN.fullmatch(t.f):
+            t.marker = LANDMARK  # «мечетью», «школой», «аптеки»
         i += 1
 
 

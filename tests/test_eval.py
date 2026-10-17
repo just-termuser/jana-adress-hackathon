@@ -110,3 +110,11 @@ def test_district_restoration_precision_floor():
     dr = district_restoration(pred, [c["expect"] for c in cases], [c["raw"] for c in cases])
     assert dr["precision"] >= 0.99, dr  # достигнуто 0.990
     assert dr["coverage"] >= 0.9176, dr  # достигнуто 0.91770
+
+
+def test_synth_landmark_floor():
+    """Ориентир вне весов ТЗ, но точность поля держим трещоткой (волна 1, класс 5)."""
+    cases = json.loads((FIX / "synth_corpus.json").read_text(encoding="utf-8"))
+    pred = extract_batch([{"id": c["id"], "raw_address": c["raw"]} for c in cases])
+    res = evaluate(pred, [c["expect"] for c in cases], raws=[c["raw"] for c in cases])
+    assert res["per_field"]["landmark"] >= 1.0, res["per_field_counts"]["landmark"]

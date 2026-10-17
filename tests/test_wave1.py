@@ -84,8 +84,8 @@ def test_no_commas_zhk_name_split_by_reference():
 @pytest.mark.parametrize(
     ("raw", "landmark"),
     [
-        todo("г. Астана, пер. Бекет Ата, 207, кв150, за мечетью", "за мечетью"),
-        todo("г. Шымкент, ул. Жолдасова, д. 219, за мечетью", "за мечетью"),
+        ("г. Астана, пер. Бекет Ата, 207, кв150, за мечетью", "за мечетью"),
+        ("г. Шымкент, ул. Жолдасова, д. 219, за мечетью", "за мечетью"),
         ("Алматы, ул. Абая 10, возле школы №45", "возле школы №45"),
         ("Алматы, напротив аптеки, ул. Абая 10", "напротив аптеки"),
         ("Костанай, пр. Абая 5, кв 3, около больницы", "около больницы"),
@@ -95,7 +95,6 @@ def test_landmark_inflected_with_preposition(raw, landmark):
     assert parse_address(raw).values["landmark"] == landmark
 
 
-@NOT_YET
 def test_landmark_does_not_leak_into_street_without_commas():
     raw = "Аксюат улица Аккожа Би 178 за мечетью"
     assert fields(raw, "street_name", "house", "landmark") == ("Аккожа Би", "178", "за мечетью")

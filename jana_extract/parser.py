@@ -478,8 +478,22 @@ class Parser:
                 t = self.toks[j]
                 if t.seg != m.seg or (t.used is not None and t.marker != "part"):
                     break
+                # Ориентир заканчивается на маркере другого компонента («… ул. Абая»),
+                # но «с»/«со» в «рядом с мечетью» — его часть.
+                if t.marker not in (None, M.LANDMARK, "part") and t.f not in M.LANDMARK_PREP:
+                    break
                 span.append(t)
                 j += 1
+            # Предлог перед ориентиром — часть ориентира: «за мечетью», «у школы».
+            prev = self.toks[span[0].i - 1] if span[0].i > 0 else None
+            if (
+                prev is not None
+                and prev.seg == m.seg
+                and prev.used is None
+                and prev.f in M.LANDMARK_PREP
+                and not prev.alt
+            ):
+                span.insert(0, prev)
             if len(span) == 1:
                 # Постфиксный ориентир: «Береке дүкені».
                 back = self._word_run(m.i - 1, -1, m.seg, 3)
@@ -893,8 +907,10 @@ class Parser:
         self.step_admin_markers()
         self.step_leading_city()
         self._prelim_region()
-        self.step_street_markers()
+        # Ориентир — до улиц: иначе «улица Аккожа Би 178 за мечетью» без запятых
+        # затягивает номер и ориентир в название улицы.
         self.step_landmarks()
+        self.step_street_markers()
         self.step_admin_unmarked()
         if self.region is None:
             self._prelim_region()
