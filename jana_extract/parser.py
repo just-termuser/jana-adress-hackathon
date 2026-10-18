@@ -412,7 +412,10 @@ class Parser:
                 continue
             if after.marker in M.STREETISH and self._is_postfix_street_marker(after):
                 continue  # «Темиртау ул.,», «Жертумсык микрорайон 51дом» — название улицы/мкр
-            found, _ = self.ref.find_settlement(self.tk.span(part[0], part[-1]), False)
+            # С областью из строки годятся и сёла КАТО этой области (контекст строки).
+            found, _ = self.ref.find_settlement(
+                self.tk.span(part[0], part[-1]), False, weak=self.region is not None
+            )
             if self.region is not None:
                 found = [s for s in found if s.region == self.region]
                 ok = bool(found)
@@ -698,7 +701,9 @@ class Parser:
 
     def _town_match(self, toks: list[Token]) -> bool:
         """Точное совпадение с городом/посёлком (или с любым НП известной области)."""
-        found, _ = self.ref.find_settlement(self.tk.span(toks[0], toks[-1]), False)
+        found, _ = self.ref.find_settlement(
+            self.tk.span(toks[0], toks[-1]), False, weak=self.region is not None
+        )
         if self.region is not None:
             return any(s.region == self.region for s in found)
         return any(s.rank >= 3 and self._region_allowed(s.region) for s in found)
@@ -816,6 +821,11 @@ class Parser:
         if street_like:
             return False
         found, score = self.ref.find_settlement(text, fuzzy=allow_fuzzy)
+        if not found and self.region is not None:
+            # «Абайская область, Кулжабас, …»: село КАТО этой области без маркера.
+            weak, _ = self.ref.find_settlement(text, fuzzy=False, weak=True)
+            found = [s for s in weak if s.region == self.region]
+            score = 1.0
         if found and score < 1.0 and not self._fuzzy_town(words):
             # Нечёткое совпадение без защиты (распространённая улица, не город) — не город.
             found = []
