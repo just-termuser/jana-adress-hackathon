@@ -572,7 +572,7 @@ class Parser:
                 continue
             if name is pre and m.marker in (M.AREA, M.ZHK):
                 name = self._split_known_area(name)
-            if name is pre and name[-1].kind == WORD and m.marker in (M.AREA, M.STREET):
+            if name is pre and name[-1].kind == WORD and m.marker in (M.AREA, M.STREET, M.ZHK):
                 self._maybe_extend_with_number(m, name)
             m.used = "marker"
             self._use(name, m.marker)
@@ -610,7 +610,7 @@ class Parser:
             return
         key = core(self.tk.span(name[0], nxt))
         house_elsewhere = "house" in self.numbers or self._has_later_free_num(nxt)
-        if m.marker == M.AREA:
+        if m.marker in (M.AREA, M.ZHK):  # «ЖК "Калкаман 2", …» — как у мкр
             known = self.ref.known_area(key, self.region) or self.ref.known_area(key)
             if (known and house_elsewhere) or (house_elsewhere and nxt.seg != self._seg_after(nxt)):
                 name.append(nxt)

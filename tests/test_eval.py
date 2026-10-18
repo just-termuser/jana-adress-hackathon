@@ -87,8 +87,8 @@ def test_synth_accuracy_floor():
     cases = json.loads((FIX / "synth_corpus.json").read_text(encoding="utf-8"))
     pred = extract_batch([{"id": c["id"], "raw_address": c["raw"]} for c in cases])
     res = evaluate(pred, [c["expect"] for c in cases], raws=[c["raw"] for c in cases])
-    # корпус v6: до КАТО 0.99431, с КАТО 0.99492, + сёла КАТО при области 0.99716
-    assert res["score"] >= 0.9971, res
+    # корпус v6: до КАТО 0.99431 → КАТО 0.99492 → сёла КАТО 0.99716 → ЖК с номером 0.99798
+    assert res["score"] >= 0.9979, res
 
 
 def test_district_counted_only_where_present_in_text():
@@ -109,7 +109,7 @@ def test_district_restoration_precision_floor():
     cases = json.loads((FIX / "synth_corpus.json").read_text(encoding="utf-8"))
     pred = extract_batch([{"id": c["id"], "raw_address": c["raw"]} for c in cases])
     dr = district_restoration(pred, [c["expect"] for c in cases], [c["raw"] for c in cases])
-    assert dr["precision"] >= 0.9865, dr  # корпус v6 + КАТО: 0.98655 (до КАТО 0.9816)
+    assert dr["precision"] >= 0.9897, dr  # корпус v6: 0.98974 (до КАТО 0.9816)
     assert dr["coverage"] >= 0.9364, dr  # корпус v6: 0.93643 (до КАТО 0.8418)
 
 
