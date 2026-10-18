@@ -5,12 +5,6 @@ import pytest
 from jana_extract.parser import parse_address
 from jana_extract.service import extract_record
 
-NOT_YET = pytest.mark.xfail(strict=True, reason="волна 3: ещё не исправлено")
-
-
-def todo(*args):
-    return pytest.param(*args, marks=NOT_YET)
-
 
 def fields(raw, *names):
     v = parse_address(raw).values
