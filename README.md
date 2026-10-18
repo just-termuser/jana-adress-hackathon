@@ -4,8 +4,6 @@
 на поля и возвращает **ровно то, что написано**: «казибек би» остаётся «казибек би»,
 падежи и опечатки не трогаются. Работает полностью офлайн.
 
-> Это самостоятельный проект. Он не связан с SaaS-движком нормализации адресов
-> Jana Address Intelligence, который решает обратную задачу.
 
 ## Быстрый старт
 
@@ -37,18 +35,6 @@ curl -X POST localhost:8000/parse/batch -H "Content-Type: application/json" \
 Контейнер не ходит в сеть: справочник лежит внутри образа. Проверено запуском с
 `--network none`.
 
-### Локально, без Docker
-
-```bash
-python -m venv .venv && . .venv/bin/activate      # Windows: .venv\Scripts\activate
-pip install -r requirements-dev.txt
-uvicorn jana_extract.api:app --port 8000           # API + интерфейс
-python -m jana_extract tests/fixtures/sample_input.json -o out.json   # CLI
-pytest                                             # тесты
-```
-
-На Windows для корректного вывода кириллицы в консоль: `set PYTHONUTF8=1`.
-
 ## API
 
 | Метод | Путь | Что делает |
@@ -73,6 +59,19 @@ pytest                                             # тесты
 **Гарантии:** на каждую входную запись приходит ровно одна выходная запись. Пустая
 строка, `null`, число вместо строки или исключение внутри парсера дают запись с
 `null`-полями и `confidence: 0`.
+
+### Локально, без Docker
+
+```bash
+python -m venv .venv && . .venv/bin/activate      # Windows: .venv\Scripts\activate
+pip install -r requirements-dev.txt
+uvicorn jana_extract.api:app --port 8000           # API + интерфейс
+python -m jana_extract tests/fixtures/sample_input.json -o out.json   # CLI
+pytest                                             # тесты
+```
+
+На Windows для корректного вывода кириллицы в консоль: `set PYTHONUTF8=1`.
+
 
 ## Веб-интерфейс
 
