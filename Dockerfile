@@ -13,7 +13,7 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 COPY jana_extract ./jana_extract
 COPY static ./static
-COPY data/reference.json.gz data/kato.json.gz ./data/
+COPY data/reference.json.gz data/kato.json.gz data/street_types.json.gz ./data/
 RUN useradd --system --uid 10001 jana && python -c "from jana_extract.reference import get_reference; print(get_reference().meta['counts'])"
 USER jana
 EXPOSE 8000

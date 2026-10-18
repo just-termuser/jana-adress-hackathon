@@ -103,9 +103,16 @@ function render() {
     if (q && !JSON.stringify(r).toLowerCase().includes(q)) return;
     const cells = FIELDS.map((f) => {
       const v = r[f];
+      const inf = !row.edited.has(f) && row.meta.inferred && row.meta.inferred[f];
+      const amb = row.meta.ambiguity && row.meta.ambiguity[f];
       const cls = ["f", v == null ? "null" : "", row.edited.has(f) ? "edited" : "",
+        inf ? "inferred" : "", amb ? "ambiguous" : "",
         isValid(f, v, r.raw_address) ? "" : "invalid"].join(" ");
-      return `<td class="${cls}" contenteditable="true" data-i="${i}" data-f="${f}">${v == null ? "" : esc(v)}</td>`;
+      // Пометка «из справочника»: значения нет в строке, оно выведено (тип улицы).
+      const title = inf ? `из справочника: ${inf.source}, доля ${inf.share}, n=${inf.n}`
+        : amb ? `неоднозначно: ${amb.join(", ")}` : "";
+      const badge = inf ? '<span class="badge">из справочника</span>' : "";
+      return `<td class="${cls}" title="${esc(title)}" contenteditable="true" data-i="${i}" data-f="${f}">${v == null ? "" : esc(v)}${badge}</td>`;
     }).join("");
     const lo = r.confidence < thr ? "lowrow" : "";
     body.push(`<tr class="${lo}"><td>${i + 1}</td><td>${esc(r.id ?? "")}</td>` +
@@ -120,7 +127,10 @@ function onEdit(e) {
   if (!td) return;
   const row = rows[+td.dataset.i];
   const f = td.dataset.f;
-  const text = td.textContent.trim();
+  // Плашка «из справочника» — не часть значения.
+  const text = Array.from(td.childNodes)
+    .filter((n) => !(n.classList && n.classList.contains("badge")))
+    .map((n) => n.textContent).join("").trim();
   const v = text === "" ? null : text;
   if (row.rec[f] === v) return;
   row.rec[f] = v;

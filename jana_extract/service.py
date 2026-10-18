@@ -25,7 +25,12 @@ def _empty(rec_id: Any, raw: Any) -> dict[str, Any]:
     return out
 
 
-def extract_record(item: Any, debug: bool = False, ref: Reference | None = None) -> dict[str, Any]:
+def extract_record(
+    item: Any,
+    debug: bool = False,
+    ref: Reference | None = None,
+    infer_street_type: bool | None = None,
+) -> dict[str, Any]:
     if isinstance(item, dict):
         rec_id = item.get("id")
         raw = item.get("raw_address")
@@ -37,7 +42,7 @@ def extract_record(item: Any, debug: bool = False, ref: Reference | None = None)
     if not isinstance(raw, str) or not raw.strip():
         return out
     try:
-        res = parse_address(raw, ref or get_reference())
+        res = parse_address(raw, ref or get_reference(), infer_street_type=infer_street_type)
     except Exception:  # запись не теряем ни при каких условиях
         log.exception("parse failed for id=%r", rec_id)
         return out
@@ -50,10 +55,16 @@ def extract_record(item: Any, debug: bool = False, ref: Reference | None = None)
             "leftovers": res.leftovers,
             "ambiguity": res.ambiguity,
             "official": res.official,
+            "inferred": res.inferred,
         }
     return out
 
 
-def extract_batch(items: list[Any], debug: bool = False) -> list[dict[str, Any]]:
+def extract_batch(
+    items: list[Any], debug: bool = False, infer_street_type: bool | None = None
+) -> list[dict[str, Any]]:
     ref = get_reference()
-    return [extract_record(it, debug=debug, ref=ref) for it in items]
+    return [
+        extract_record(it, debug=debug, ref=ref, infer_street_type=infer_street_type)
+        for it in items
+    ]

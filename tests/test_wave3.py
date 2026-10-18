@@ -37,7 +37,10 @@ def fields(raw, *names):
     ],
 )
 def test_duplicated_city_is_not_a_street(raw, street_type, street, living, house):
-    assert fields(raw, "street_type", "street_name", "living_area", "house") == (
+    # Тест про дубль города; street_type здесь — только тип, записанный в строке,
+    # поэтому вывод типа из справочника (волна 4) отключён.
+    v = parse_address(raw, infer_street_type=False).values
+    assert tuple(v[f] for f in ("street_type", "street_name", "living_area", "house")) == (
         street_type,
         street,
         living,

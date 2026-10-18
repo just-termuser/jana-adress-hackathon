@@ -22,6 +22,11 @@ from .text import core, fold
 
 DEFAULT_PATH = Path(__file__).resolve().parents[1] / "data" / "reference.json.gz"
 KATO_PATH = Path(__file__).resolve().parents[1] / "data" / "kato.json.gz"
+STREET_TYPES_PATH = Path(__file__).resolve().parents[1] / "data" / "street_types.json.gz"
+
+# Вывод типа улицы: один вариант должен набрать не меньше доли и вхождений.
+STREET_TYPE_MIN_SHARE = 0.9
+STREET_TYPE_MIN_N = 3
 
 # Ключи уже прошли fold(): мягкий знак убран, поэтому «област», а не «область».
 _REGION_WORDS = re.compile(r"\b(област|облысы|обл)\b")
@@ -132,7 +137,12 @@ class Reference:
                 kato = json.load(fh)
             canonical = os.environ.get("JANA_KATO_CANONICAL", "") in ("1", "true", "yes")
             data = merge_kato(data, kato, kato_canonical=canonical)
-        return cls(data)
+        ref = cls(data)
+        if STREET_TYPES_PATH.exists():
+            with gzip.open(STREET_TYPES_PATH, "rt", encoding="utf-8") as fh:
+                ref.street_types = json.load(fh)
+            ref.meta = {**ref.meta, "street_types": ref.street_types["meta"]}
+        return ref
 
     # ------------------------------------------------------------------ helpers
 
@@ -278,6 +288,44 @@ class Reference:
         total = sum(best.values())
         d, c = max(best.items(), key=lambda kv: kv[1])
         return int(d), c / total
+
+    def infer_street_type(self, key: str, region: int | None) -> dict | None:
+        """Тип улицы по справочнику для названия без типа в строке.
+
+        Уровни от самого локального: город респ. значения → область → страна.
+        Берётся первый уровень, где название встречается не меньше
+        STREET_TYPE_MIN_N раз. Тип выдаётся, если один вариант набирает долю не
+        ниже STREET_TYPE_MIN_SHARE; иначе value = None, а кандидаты — с долями.
+        """
+        st = getattr(self, "street_types", None)
+        if not st or not key:
+            return None
+        levels = []
+        if region is not None and region >= 0:
+            name = self.regions[region]["name"]
+            if self.regions[region]["kind"] == "city":
+                levels.append((f"reference:{name}", st["by_city"].get(name, {})))
+            else:
+                levels.append((f"reference:{name}", st["by_region"].get(str(region), {})))
+        levels.append(("reference:Казахстан", st["national"]))
+        for source, table in levels:
+            counts = table.get(key)
+            if not counts:
+                continue
+            n = sum(counts.values())
+            if n < STREET_TYPE_MIN_N:
+                continue
+            ranked = sorted(counts.items(), key=lambda kv: -kv[1])
+            top, c = ranked[0]
+            share = c / n
+            return {
+                "value": top if share >= STREET_TYPE_MIN_SHARE else None,
+                "source": source,
+                "share": round(share, 3),
+                "n": n,
+                "candidates": [f"{t} ({k / n:.2f})" for t, k in ranked[:4]],
+            }
+        return None
 
     def known_street(self, key: str, region: int | None = None) -> bool:
         if region is not None and region >= 0:

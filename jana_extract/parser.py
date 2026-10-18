@@ -21,6 +21,7 @@
 from __future__ import annotations
 
 import itertools
+import os
 import re
 from dataclasses import dataclass, field
 
@@ -45,6 +46,13 @@ FIELDS = (
     "landmark",
 )
 
+# Вывод типа улицы из справочника, когда его нет в строке (флаг отключения).
+INFER_STREET_TYPE_DEFAULT = os.environ.get("JANA_INFER_STREET_TYPE", "1").lower() not in (
+    "0",
+    "false",
+    "off",
+    "no",
+)
 # Район по улице/мкр в городах респ. значения выдаётся при доле адресов в одном
 # районе не ниже порога. 0.75 выбран по кривой «порог → точность/покрытие»
 # (tools/district_study.py, reports/stage2.md): точность важнее полноты.
@@ -92,11 +100,14 @@ class Result:
     ambiguity: dict[str, list[str]] = field(default_factory=dict)
     # Официальные названия и коды КАТО для найденных области, района и НП.
     official: dict[str, dict] = field(default_factory=dict)
+    # Поля, выведенные из справочника, а не взятые из строки (тип улицы).
+    inferred: dict[str, dict] = field(default_factory=dict)
     confidence: float = 0.0
 
 
 class Parser:
-    def __init__(self, raw: str, ref: Reference) -> None:
+    def __init__(self, raw: str, ref: Reference, infer_street_type: bool = True) -> None:
+        self.infer_street_type = infer_street_type
         self.raw = raw or ""
         self.ref = ref
         self.tk = tokenize(self.raw)
@@ -1178,6 +1189,18 @@ class Parser:
         if settlement is not None and self.ref.settlement_official[settlement.idx]:
             res.official["city"] = self.ref.settlement_official[settlement.idx]
 
+        # --- тип улицы из справочника, если его нет в строке (street_name не трогаем)
+        if self.infer_street_type and street_c is not None and v["street_type"] is None:
+            info = self.ref.infer_street_type(core(v["street_name"]), region_idx)
+            if info and info["value"]:
+                v["street_type"] = info["value"]
+                cf["street_type"] = 0.5 + 0.4 * info["share"]
+                res.inferred["street_type"] = {
+                    k: info[k] for k in ("value", "source", "share", "n")
+                }
+            elif info:
+                res.ambiguity["street_type"] = info["candidates"]
+
         cf["city"] = city_conf
         cf["province"] = region_conf
         cf["district"] = district_conf
@@ -1250,8 +1273,14 @@ class Parser:
         return self.resolve()
 
 
-def parse_address(raw: str, ref: Reference | None = None) -> Result:
-    return Parser(raw, ref or get_reference()).run()
+def parse_address(
+    raw: str, ref: Reference | None = None, infer_street_type: bool | None = None
+) -> Result:
+    """infer_street_type=None — по умолчанию (переменная JANA_INFER_STREET_TYPE,
+    включено, если не «0/false/off»)."""
+    if infer_street_type is None:
+        infer_street_type = INFER_STREET_TYPE_DEFAULT
+    return Parser(raw, ref or get_reference(), infer_street_type=infer_street_type).run()
 
 
 def empty_result() -> Result:

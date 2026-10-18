@@ -55,8 +55,11 @@ def parse_one(
         ..., examples=[{"id": "rec_1", "raw_address": "г. Алматы, ул. Абая 5"}]
     ),
     debug: bool = Query(False, description="Добавить _meta: уверенность по полям и позиции"),
+    infer_street_type: bool = Query(
+        True, description="Выводить тип улицы из справочника, если его нет в строке"
+    ),
 ) -> dict[str, Any]:
-    return extract_record(item, debug=debug)
+    return extract_record(item, debug=debug, infer_street_type=infer_street_type)
 
 
 def _records_from_payload(payload: Any) -> list[Any]:
@@ -83,10 +86,13 @@ def parse_batch(
         ],
     ),
     debug: bool = Query(False),
+    infer_street_type: bool = Query(
+        True, description="Выводить тип улицы из справочника, если его нет в строке"
+    ),
 ) -> JSONResponse:
     records = _records_from_payload(payload)
     t0 = time.perf_counter()
-    out = extract_batch(records, debug=debug)
+    out = extract_batch(records, debug=debug, infer_street_type=infer_street_type)
     took = time.perf_counter() - t0
     return JSONResponse(
         out, headers={"X-Records": str(len(out)), "X-Elapsed-Ms": f"{took * 1000:.0f}"}
@@ -118,9 +124,12 @@ async def parse_file(
     file: UploadFile = File(...),
     format: str = Query("json", pattern="^(json|csv)$"),
     debug: bool = Query(False),
+    infer_street_type: bool = Query(
+        True, description="Выводить тип улицы из справочника, если его нет в строке"
+    ),
 ) -> Response:
     records = _records_from_payload(_read_upload(file.filename or "", await file.read()))
-    out = extract_batch(records, debug=debug)
+    out = extract_batch(records, debug=debug, infer_street_type=infer_street_type)
     if format == "csv":
         buf = io.StringIO()
         w = csv.DictWriter(buf, fieldnames=list(OUTPUT_KEYS), extrasaction="ignore")
