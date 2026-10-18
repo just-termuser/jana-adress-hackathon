@@ -90,6 +90,8 @@ class Result:
     leftovers: list[str] = field(default_factory=list)
     # Неустранимая неоднозначность: поле -> кандидаты (для отладки и интерфейса).
     ambiguity: dict[str, list[str]] = field(default_factory=dict)
+    # Официальные названия и коды КАТО для найденных области, района и НП.
+    official: dict[str, dict] = field(default_factory=dict)
     confidence: float = 0.0
 
 
@@ -102,6 +104,9 @@ class Parser:
         self.comps: list[Comp] = []
         self.numbers: dict[str, tuple[Token, float]] = {}  # field -> (token, conf)
         self.region: int | None = None  # предварительная область для проверок по справочнику
+        # Неоднозначный район из строки («Алматы р-н» — в Астане и в Актобе):
+        # область неизвестна, но ограничена его областями-кандидатами.
+        self.region_candidates: set[int] | None = None
 
     # ------------------------------------------------------------------ helpers
 
@@ -345,7 +350,7 @@ class Parser:
             part = run[:k] if prefix_dir else run[n - k :]
             text = self.tk.span(part[0], part[-1])
             if kind in (M.CITY, M.SETTLEMENT):
-                found, _ = self.ref.find_settlement(text, fuzzy=False)
+                found, _ = self.ref.find_settlement(text, fuzzy=False, weak=kind == M.SETTLEMENT)
                 if found:
                     return part
             elif kind == M.REGION:
@@ -669,9 +674,7 @@ class Parser:
         found, score = self.ref.find_settlement(text, fuzzy=True)
         if score >= 1.0:
             return []  # точные совпадения обрабатываются отдельно
-        return [
-            s for s in found if s.rank >= 3 and (self.region is None or s.region == self.region)
-        ]
+        return [s for s in found if s.rank >= 3 and self._region_allowed(s.region)]
 
     def _is_postfix_street_marker(self, m: Token) -> bool:
         """Маркер улицы/мкр стоит ПОСЛЕ названия: за ним нет ни слова, ни свободного
@@ -687,7 +690,12 @@ class Parser:
         found, _ = self.ref.find_settlement(self.tk.span(toks[0], toks[-1]), False)
         if self.region is not None:
             return any(s.region == self.region for s in found)
-        return any(s.rank >= 3 for s in found)
+        return any(s.rank >= 3 and self._region_allowed(s.region) for s in found)
+
+    def _region_allowed(self, region: int) -> bool:
+        if self.region is not None:
+            return region == self.region
+        return self.region_candidates is None or region in self.region_candidates
 
     def _is_trailing_city(self, t: Token) -> bool:
         """Слова от t до конца строки — известный город: «проспект Ваганная 69 Алга»."""
@@ -919,6 +927,14 @@ class Parser:
         main = [c for c in cs if not c.alt]
         return (main or cs or [None])[0]
 
+    def _marker_of(self, c: Comp) -> list[Token]:
+        """Маркеры, стоящие вплотную к компоненту (до и после) в том же сегменте."""
+        out = []
+        for t in (self._prev(c.toks[0]), self._next(c.toks[-1])):
+            if t is not None and t.marker is not None and t.used == "marker":
+                out.append(t)
+        return out
+
     def _narrow_by_evidence(self, items: list, region_of, keys: list[str]) -> list:
         """Оставляет кандидатов, в чьей области есть улица/мкр из строки.
 
@@ -967,6 +983,8 @@ class Parser:
             if len(regions) == 1:
                 self.region = regions.pop()
                 return
+            if regions:
+                self.region_candidates = regions
         for c in self.comps:
             if c.kind in (M.CITY, M.SETTLEMENT):
                 found, _ = self.ref.find_settlement(c.text(self.tk))
@@ -1067,7 +1085,7 @@ class Parser:
         if city_c:
             v["city"] = city_c.text(self.tk)
             res.spans["city"] = (city_c.toks[0].start, city_c.toks[-1].end)
-            found, score = self.ref.find_settlement(v["city"], fuzzy=True)
+            found, score = self.ref.find_settlement(v["city"], fuzzy=True, weak=True)
             # Сначала контекст строки: область и район.
             pool = [
                 s
@@ -1079,6 +1097,15 @@ class Parser:
             # Затем улики: улица/мкр из строки, которые есть только у части кандидатов.
             # Улика выбирает область, но район по ней не восстанавливаем: она
             # слабее явной области в строке (точность важнее полноты).
+            # Маркер «город»/«қаласы» в строке исключает сёла.
+            if city_c.marked and any(t.marker == M.CITY for t in self._marker_of(city_c)):
+                towns = [s for s in pool if s.rank >= 3]
+                pool = towns or pool
+            # Один город/посёлок против сёл, известных только из КАТО (без координат и
+            # населения): такое село не конкурирует с райцентром.
+            towns = [s for s in pool if s.rank >= 3]
+            if len(towns) == 1 and all(s.weak for s in pool if s is not towns[0]):
+                pool = towns
             unique_by_context = len(pool) == 1
             if len(pool) > 1:
                 pool = self._narrow_by_evidence(pool, lambda s: s.region, evidence)
@@ -1140,10 +1167,16 @@ class Parser:
             if region_idx is None:
                 region_idx, region_conf = d["region"], 0.8 * district_conf
             v["district"] = d["name"]
+            if d.get("official"):
+                res.official["district"] = d["official"]
         elif district_text:
             v["district"] = district_text
         if region_idx is not None:
             v["province"] = self.ref.region_name(region_idx)
+            if self.ref.regions[region_idx].get("official"):
+                res.official["province"] = self.ref.regions[region_idx]["official"]
+        if settlement is not None and self.ref.settlement_official[settlement.idx]:
+            res.official["city"] = self.ref.settlement_official[settlement.idx]
 
         cf["city"] = city_conf
         cf["province"] = region_conf

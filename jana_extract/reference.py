@@ -21,6 +21,7 @@ from rapidfuzz import fuzz, process
 from .text import core, fold
 
 DEFAULT_PATH = Path(__file__).resolve().parents[1] / "data" / "reference.json.gz"
+KATO_PATH = Path(__file__).resolve().parents[1] / "data" / "kato.json.gz"
 
 # Ключи уже прошли fold(): мягкий знак убран, поэтому «област», а не «область».
 _REGION_WORDS = re.compile(r"\b(област|облысы|обл)\b")
@@ -36,6 +37,7 @@ class Settlement:
     pop: int
     region: int
     district: int | None
+    weak: bool = False  # НП есть только в КАТО: без координат и населения
 
 
 class Reference:
@@ -44,9 +46,19 @@ class Reference:
         self.regions = data["regions"]
         self.districts = data["districts"]
         self.settlements = [
-            Settlement(i, s["name"], s["kind"], s["rank"], s["pop"], s["region"], s["district"])
+            Settlement(
+                i,
+                s["name"],
+                s["kind"],
+                s["rank"],
+                s["pop"],
+                s["region"],
+                s["district"],
+                s.get("source") == "kato",
+            )
             for i, s in enumerate(data["settlements"])
         ]
+        self.settlement_official = [s.get("official") for s in data["settlements"]]
         self.street_names: dict[str, int] = data["street_names"]
         self.area_names: dict[str, int] = data["area_names"]
         self.city_streets: dict[str, dict[str, dict[str, int]]] = data["city_streets"]
@@ -87,7 +99,11 @@ class Reference:
             for k in keys:
                 if k and i not in self.settlement_index[k]:
                     self.settlement_index[k].append(i)
-        self._settlement_keys = [k for k in self.settlement_index if len(k) >= 4]
+        self._settlement_keys = [
+            k
+            for k in self.settlement_index
+            if len(k) >= 4 and any(not self.settlements[i].weak for i in self.settlement_index[k])
+        ]
         # Города и посёлки: опечатки в них частые («Алмата»), а ложных
         # совпадений меньше, чем среди 7000 сёл — порог ниже.
         self._town_keys = [
@@ -104,7 +120,19 @@ class Reference:
     def load(cls, path: str | os.PathLike | None = None) -> Reference:
         p = Path(path or os.environ.get("JANA_REFERENCE") or DEFAULT_PATH)
         with gzip.open(p, "rt", encoding="utf-8") as fh:
-            return cls(json.load(fh))
+            data = json.load(fh)
+        # КАТО: официальные названия и районы городов областного значения.
+        # JANA_KATO=off — отключить (остаёмся на одном OSM).
+        kato_env = os.environ.get("JANA_KATO", "")
+        kato_path = Path(kato_env) if kato_env not in ("", "off", "0") else KATO_PATH
+        if kato_env not in ("off", "0") and kato_path.exists():
+            from .kato import merge_kato
+
+            with gzip.open(kato_path, "rt", encoding="utf-8") as fh:
+                kato = json.load(fh)
+            canonical = os.environ.get("JANA_KATO_CANONICAL", "") in ("1", "true", "yes")
+            data = merge_kato(data, kato, kato_canonical=canonical)
+        return cls(data)
 
     # ------------------------------------------------------------------ helpers
 
@@ -193,7 +221,12 @@ class Reference:
         # всё равно возвращаем — имя района одинаковое, но доверие ниже.
         return cands[0], score if len(cands) == 1 else score * 0.85
 
-    def find_settlement(self, text: str, fuzzy: bool = True) -> tuple[list[Settlement], float]:
+    def find_settlement(
+        self, text: str, fuzzy: bool = True, weak: bool = False
+    ) -> tuple[list[Settlement], float]:
+        """НП по названию. weak=True — включая сёла, которые есть только в КАТО:
+        их ищем только при маркере НП («с.», «ауылы») и при разрешении уже
+        найденного города; в поиске города без маркера они перехватывали бы улицы."""
         f = fold(text)
         if not f:
             return [], 0.0
@@ -205,7 +238,12 @@ class Reference:
                 idx, score = self.settlement_index[hit[0]], hit[1] * 0.9
         if not idx:
             return [], 0.0
-        found = sorted((self.settlements[i] for i in idx), key=lambda s: (-s.rank, -s.pop))
+        found = sorted(
+            (self.settlements[i] for i in idx if weak or not self.settlements[i].weak),
+            key=lambda s: (-s.rank, -s.pop),
+        )
+        if not found:
+            return [], 0.0
         return found, score
 
     def best_settlement(

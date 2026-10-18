@@ -49,6 +49,7 @@ def extract_record(item: Any, debug: bool = False, ref: Reference | None = None)
             "spans": res.spans,
             "leftovers": res.leftovers,
             "ambiguity": res.ambiguity,
+            "official": res.official,
         }
     return out
 

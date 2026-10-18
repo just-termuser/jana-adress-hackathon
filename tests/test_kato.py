@@ -9,12 +9,6 @@ from jana_extract.parser import parse_address
 from jana_extract.reference import get_reference
 from jana_extract.service import extract_record
 
-NOT_YET = pytest.mark.xfail(strict=True, reason="волна 4: КАТО ещё не интегрирован")
-
-
-def todo(*args):
-    return pytest.param(*args, marks=NOT_YET)
-
 
 def fields(raw, *names):
     v = parse_address(raw).values
@@ -26,13 +20,13 @@ def fields(raw, *names):
     [
         # «Астана» и «Алматы» здесь — районы города Актобе, а не города.
         ("Актобе, район Астана, ул. Абая 5", "Актобе", "Астана", "Актюбинская область"),
-        todo(
+        (
             "г. Актобе, район Алматы, пр. Абилкайыр хана 55",
             "Актобе",
             "Алматы",
             "Актюбинская область",
         ),
-        todo(
+        (
             "Караганда, район им. Казыбек би, ул. Ерубаева 50",
             "Караганда",
             "им. Казыбек би",
@@ -44,7 +38,7 @@ def fields(raw, *names):
             "Әлихан Бөкейхан",
             "Карагандинская область",
         ),
-        todo(
+        (
             "Караганда, район Алихан Бокейхан, ул. Гоголя 12",
             "Караганда",
             "Әлихан Бөкейхан",
@@ -70,7 +64,6 @@ def test_oblast_city_district_not_restored_by_street():
     assert fields("г. Актобе, ул. Абая 5", "district") == (None,)
 
 
-@NOT_YET
 def test_kato_provenance_in_reference_meta():
     meta = get_reference().meta
     kato = meta["kato"]
@@ -79,7 +72,6 @@ def test_kato_provenance_in_reference_meta():
     assert kato["rows"] == 15586
 
 
-@NOT_YET
 def test_official_name_and_code_in_debug_meta():
     rec = extract_record(
         {"id": 1, "raw_address": "Караганда, район им. Казыбек би, ул. Ерубаева 50"}, debug=True

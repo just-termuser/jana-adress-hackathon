@@ -87,8 +87,8 @@ def test_synth_accuracy_floor():
     cases = json.loads((FIX / "synth_corpus.json").read_text(encoding="utf-8"))
     pred = extract_batch([{"id": c["id"], "raw_address": c["raw"]} for c in cases])
     res = evaluate(pred, [c["expect"] for c in cases], raws=[c["raw"] for c in cases])
-    # трещотка: достигнуто 0.99717 (корпус v5, волна 3: классы 10, 6, 2, 8)
-    assert res["score"] >= 0.9971, res
+    # корпус v6 (OSM + КАТО): до КАТО 0.99431, с КАТО 0.99492
+    assert res["score"] >= 0.9949, res
 
 
 def test_district_counted_only_where_present_in_text():
@@ -109,8 +109,8 @@ def test_district_restoration_precision_floor():
     cases = json.loads((FIX / "synth_corpus.json").read_text(encoding="utf-8"))
     pred = extract_batch([{"id": c["id"], "raw_address": c["raw"]} for c in cases])
     dr = district_restoration(pred, [c["expect"] for c in cases], [c["raw"] for c in cases])
-    assert dr["precision"] >= 0.9863, dr  # корпус v5, волна 3: 0.98637
-    assert dr["coverage"] >= 0.9325, dr  # корпус v5, волна 3: 0.93254
+    assert dr["precision"] >= 0.9865, dr  # корпус v6 + КАТО: 0.98655 (до КАТО 0.9816)
+    assert dr["coverage"] >= 0.9342, dr  # корпус v6 + КАТО: 0.93422 (до КАТО 0.8418)
 
 
 def test_synth_landmark_floor():

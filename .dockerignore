@@ -11,3 +11,4 @@ osm
 .env
 .env.*
 .git
+data/raw

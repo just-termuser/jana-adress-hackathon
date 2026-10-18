@@ -25,6 +25,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from jana_extract.kato import merge_kato  # noqa: E402
 from jana_extract.markers import SINGLE  # noqa: E402
 from jana_extract.parser import FIELDS  # noqa: E402
 from jana_extract.reference import Reference  # noqa: E402
@@ -53,6 +54,10 @@ TYPO_SUBST = {"а": "о", "о": "а", "ы": "и", "и": "ы", "е": "и", "у": 
 class Ref:
     def __init__(self, path: Path) -> None:
         r = json.load(gzip.open(path, "rt", encoding="utf-8"))
+        # Тот же объединённый справочник (OSM + КАТО), что видит парсер.
+        kato_path = Path(path).with_name("kato.json.gz")
+        if kato_path.exists():
+            r = merge_kato(r, json.load(gzip.open(kato_path, "rt", encoding="utf-8")))
         for i, s in enumerate(r["settlements"]):
             s["_idx"] = i
         self.jref = Reference.load(path)
@@ -110,7 +115,9 @@ class Ref:
                 merged[d] = merged.get(d, 0) + c
         return merged or None
 
-    def unambiguous_district(self, settlement: dict, region_ctx: int | None) -> str | None:
+    def unambiguous_district(
+        self, settlement: dict, region_ctx: int | None, city_marked: bool = False
+    ) -> str | None:
         """Район НП, если «НП → район» однозначно по справочнику и контексту строки.
 
         Неоднозначно: больше одного одноимённого НП, не различимых по области из
@@ -118,8 +125,15 @@ class Ref:
         с названием самого города (горадминистрация, как «Конаев»)."""
         if settlement.get("district") is None:
             return None
-        found, _ = self.jref.find_settlement(settlement["name"], fuzzy=False)
+        found, _ = self.jref.find_settlement(settlement["name"], fuzzy=False, weak=True)
         pool = [s for s in found if region_ctx is None or s.region == region_ctx]
+        # Те же правила, что у парсера: маркер «город» исключает сёла; один город
+        # против сёл, известных только из КАТО, — однозначен.
+        if city_marked:
+            pool = [s for s in pool if s.rank >= 3] or pool
+        towns = [s for s in pool if s.rank >= 3]
+        if len(towns) == 1 and all(s.weak for s in pool if s is not towns[0]):
+            pool = towns
         # Однозначно = ровно один НП с таким названием после учёта контекста строки.
         # Перевес по рангу («самая крупная Алексеевка») однозначностью не считается.
         if len(pool) != 1 or pool[0].idx != settlement["_idx"]:
@@ -209,6 +223,7 @@ def gen_record(rnd: random.Random, ref: Ref, i: int) -> dict:
         tags.append("typo_city")
     kk_city = kk_variant(settlement)
     city_omitted = False
+    city_marked = False  # город записан с маркером «г.», «город», «қаласы»
     district_instead = kind == "rep" and rnd.random() < 0.05
     if district_instead:
         city_omitted = True
@@ -227,19 +242,25 @@ def gen_record(rnd: random.Random, ref: Ref, i: int) -> dict:
         if r < 0.20 and kk_city and city_text == city:
             sep = rnd.choice(["/", " / "])
             parts.append(f"город {city_text}{sep}{kk_city} қаласы")
+            city_marked = True
             tags.append("bilingual_city")
         elif r < 0.27 and kk_city and city_text == city:
             city_text = kk_city
             parts.append(f"{kk_city} қаласы")
+            city_marked = True
             tags.append("kazakh_city")
         elif r < 0.45:
             parts.append(f"г. {city_text}")
+            city_marked = True
         elif r < 0.55:
             parts.append(f"г.{city_text}")
+            city_marked = True
         elif r < 0.62:
             parts.append(f"город {city_text}")
+            city_marked = True
         elif r < 0.66:
             parts.append(f"{city_text} г")
+            city_marked = True
         else:
             parts.append(city_text)
         if rnd.random() < 0.04:
@@ -250,7 +271,7 @@ def gen_record(rnd: random.Random, ref: Ref, i: int) -> dict:
         # Конвенция 1: район НП из справочника, если соответствие однозначно
         # с учётом того, что есть в строке (область). Иначе null.
         gold["district"] = ref.unambiguous_district(
-            settlement, reg_idx if "region_in_text" in tags else None
+            settlement, reg_idx if "region_in_text" in tags else None, city_marked
         )
 
     # ---------------------------------------------------------------- улица
